@@ -1,6 +1,5 @@
 package io.github.summpot.appliedflooring.neoforge
 
-import dev.architectury.platform.neoforge.EventBuses
 import io.github.summpot.appliedflooring.AppliedFlooringMod
 import net.neoforged.fml.common.Mod
 
