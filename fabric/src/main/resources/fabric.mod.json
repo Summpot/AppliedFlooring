@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "appliedflooring",
-  "version": "",
+  "version": "${version}",
   "name": "Applied Flooring",
   "description": "High-performance ME flooring blocks and embedded multipart attachments for Applied Energistics 2",
   "authors": [
@@ -21,6 +21,6 @@
     "fabricloader": ">=0.15.0",
     "fabric-language-kotlin": "*",
     "architectury": "*",
-    "appliedenergistics2": "*"
+    "ae2": "*"
   }
 }

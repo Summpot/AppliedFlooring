@@ -1,6 +1,6 @@
 val minecraftVersion = "1.21.1"
 val architecturyVersion = "13.0.11"
-val ae2Version = "16.0.2"
+val ae2Version = "19.0.4-alpha"
 
 architectury {
     minecraft = minecraftVersion

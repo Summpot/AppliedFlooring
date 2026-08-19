@@ -1,5 +1,8 @@
 package io.github.summpot.appliedflooring
 
+import dev.architectury.utils.Env
+import dev.architectury.utils.EnvExecutor
+import io.github.summpot.appliedflooring.client.MEFlooringClient
 import io.github.summpot.appliedflooring.registry.ModBlockEntities
 import io.github.summpot.appliedflooring.registry.ModBlocks
 import io.github.summpot.appliedflooring.registry.ModCreativeTabs
@@ -16,6 +19,15 @@ object AppliedFlooringMod {
         ModItems.register()
         ModBlockEntities.register()
         ModCreativeTabs.register()
+
+        EnvExecutor.runInEnv(Env.CLIENT) {
+            Runnable {
+                dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_SETUP.register {
+                    MEFlooringClient.init()
+                }
+            }
+        }
+
         LOGGER.info("Applied Flooring Mod initialized successfully.")
     }
 }

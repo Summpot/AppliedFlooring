@@ -17,10 +17,12 @@ import appeng.api.util.DimensionalBlockPos
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
@@ -37,6 +39,8 @@ open class MEFlooringBlockEntity(
     val isDenseCable: Boolean = false,
     var currentColor: AEColor = AEColor.TRANSPARENT
 ) : BlockEntity(type, pos, state), IInWorldGridNodeHost, IPartHost {
+
+    private val parts: Array<IPart?> = arrayOfNulls(6)
 
     val mainNode: IManagedGridNode = GridHelper.createManagedNode(this, NodeListener)
         .setFlags(GridFlags.PREFERRED)
@@ -65,8 +69,31 @@ open class MEFlooringBlockEntity(
     open fun onEntitySteppedOn(entity: Entity) {
     }
 
+    fun initNode() {
+        val lvl = level
+        if (lvl != null && !lvl.isClientSide && !isRemoved) {
+            if (!mainNode.isReady) {
+                mainNode.create(lvl, worldPosition)
+            }
+            for (part in parts) {
+                part?.addToWorld()
+            }
+        }
+    }
+
+    override fun setLevel(level: Level) {
+        super.setLevel(level)
+        initNode()
+    }
+
     override fun getCableConnectionType(dir: Direction?): AECableType {
-        return if (isDenseCable) AECableType.DENSE_COVERED else AECableType.COVERED
+        if (dir != null) {
+            val part = parts[dir.ordinal]
+            if (part != null) {
+                return part.externalCableConnectionType
+            }
+        }
+        return if (isDenseCable) AECableType.DENSE_SMART else AECableType.SMART
     }
 
     override fun isBlocked(side: Direction?): Boolean {
@@ -78,17 +105,27 @@ open class MEFlooringBlockEntity(
     }
 
     override fun getGridNode(dir: Direction?): IGridNode? {
+        if (dir != null) {
+            val part = parts[dir.ordinal]
+            if (part != null) {
+                val extNode = part.externalFacingNode
+                if (extNode != null) return extNode
+            }
+        }
         return mainNode.node
     }
 
     override fun setRemoved() {
         super.setRemoved()
         mainNode.destroy()
+        for (part in parts) {
+            part?.removeFromWorld()
+        }
     }
 
     override fun clearRemoved() {
         super.clearRemoved()
-        mainNode.create(level, worldPosition)
+        initNode()
     }
 
     override fun getFacadeContainer(): IFacadeContainer? {
@@ -96,15 +133,44 @@ open class MEFlooringBlockEntity(
     }
 
     override fun getPart(side: Direction?): IPart? {
-        return null
+        if (side == null) return null
+        return parts[side.ordinal]
     }
 
     override fun canAddPart(part: ItemStack?, side: Direction?): Boolean {
-        return true
+        if (side == null || part == null) return false
+        val item = part.item
+        if (item !is IPartItem<*>) return false
+        val dummy = item.createPart()
+        if (dummy is appeng.api.implementations.parts.ICablePart) return false
+
+        if (isDenseCable) {
+            val dummy = item.createPart()
+            if (dummy != null && !dummy.canBePlacedOn(appeng.api.parts.BusSupport.DENSE_CABLE)) {
+                return false
+            }
+        }
+
+        return parts[side.ordinal] == null
     }
 
     override fun <T : IPart?> addPart(partItem: IPartItem<T>?, side: Direction?, owner: Player?): T? {
-        return null
+        if (side == null || partItem == null) return null
+        if (parts[side.ordinal] != null) return null
+        val part = partItem.createPart() ?: return null
+        part.setPartHostInfo(side, this, this)
+        if (owner != null) {
+            part.onPlacement(owner)
+        }
+        parts[side.ordinal] = part
+        val lvl = level
+        if (lvl != null && !lvl.isClientSide && !isRemoved) {
+            part.addToWorld()
+        }
+        markForUpdate()
+        markForSave()
+        @Suppress("UNCHECKED_CAST")
+        return part as T
     }
 
     override fun <T : IPart?> replacePart(
@@ -113,10 +179,43 @@ open class MEFlooringBlockEntity(
         owner: Player?,
         hand: InteractionHand?
     ): T? {
-        return null
+        if (side == null || partItem == null) return null
+        removePartFromSide(side)
+        return addPart(partItem, side, owner)
     }
 
     override fun removePartFromSide(side: Direction?) {
+        if (side == null) return
+        val p = parts[side.ordinal]
+        if (p != null) {
+            p.removeFromWorld()
+            parts[side.ordinal] = null
+            markForUpdate()
+            markForSave()
+        }
+    }
+
+    override fun removePart(part: IPart?): Boolean {
+        if (part == null) return false
+        for (i in parts.indices) {
+            if (parts[i] == part) {
+                part.removeFromWorld()
+                parts[i] = null
+                markForUpdate()
+                markForSave()
+                return true
+            }
+        }
+        return false
+    }
+
+    fun addAdditionalDrops(drops: MutableList<ItemStack>, wrenched: Boolean) {
+        for (part in parts) {
+            if (part != null) {
+                part.addPartDrop(drops, wrenched)
+                part.addAdditionalDrops(drops, wrenched)
+            }
+        }
     }
 
     override fun markForUpdate() {
@@ -140,18 +239,31 @@ open class MEFlooringBlockEntity(
     }
 
     override fun clearContainer() {
+        for (i in parts.indices) {
+            parts[i]?.removeFromWorld()
+            parts[i] = null
+        }
     }
 
     override fun selectPartLocal(pos: Vec3?): SelectedPart {
-        return SelectedPart()
+        if (pos == null) return SelectedPart()
+        val dx = pos.x - 0.5
+        val dy = pos.y - 0.5
+        val dz = pos.z - 0.5
+        val absX = kotlin.math.abs(dx)
+        val absY = kotlin.math.abs(dy)
+        val absZ = kotlin.math.abs(dz)
+        val side = when {
+            absY >= absX && absY >= absZ -> if (dy > 0) Direction.UP else Direction.DOWN
+            absX >= absY && absX >= absZ -> if (dx > 0) Direction.EAST else Direction.WEST
+            else -> if (dz > 0) Direction.SOUTH else Direction.NORTH
+        }
+        val part = parts[side.ordinal]
+        return if (part != null) SelectedPart(part, side) else SelectedPart()
     }
 
     override fun getCollisionShape(context: CollisionContext?): VoxelShape {
         return Shapes.empty()
-    }
-
-    override fun removePart(part: IPart?): Boolean {
-        return false
     }
 
     override fun markForSave() {
@@ -168,14 +280,19 @@ open class MEFlooringBlockEntity(
     }
 
     override fun isEmpty(): Boolean {
-        return true
+        return parts.all { it == null }
     }
 
     override fun cleanup() {
     }
 
     override fun notifyNeighbors() {
+        val lvl = level
+        if (lvl != null && !lvl.isClientSide) {
+            lvl.updateNeighborsAt(worldPosition, blockState.block)
+        }
     }
+
 
     override fun isInWorld(): Boolean {
         return level != null && !isRemoved
@@ -196,6 +313,18 @@ open class MEFlooringBlockEntity(
         super.saveAdditional(tag)
         mainNode.saveToNBT(tag)
         tag.putInt("AEColor", currentColor.ordinal)
+
+        val partsTag = CompoundTag()
+        for (dir in Direction.values()) {
+            val part = parts[dir.ordinal]
+            if (part != null) {
+                val partTag = CompoundTag()
+                partTag.putString("id", IPartItem.getId(part.partItem).toString())
+                part.writeToNBT(partTag)
+                partsTag.put(dir.name, partTag)
+            }
+        }
+        tag.put("AFParts", partsTag)
     }
 
     override fun load(tag: CompoundTag) {
@@ -208,5 +337,47 @@ open class MEFlooringBlockEntity(
                 mainNode.setGridColor(currentColor)
             }
         }
+
+        if (tag.contains("AFParts")) {
+            val partsTag = tag.getCompound("AFParts")
+            for (dir in Direction.values()) {
+                if (partsTag.contains(dir.name)) {
+                    val partTag = partsTag.getCompound(dir.name)
+                    val id = ResourceLocation.tryParse(partTag.getString("id"))
+                    if (id != null) {
+                        val partItem = IPartItem.byId(id)
+                        if (partItem != null) {
+                            var part = parts[dir.ordinal]
+                            if (part == null || IPartItem.getId(part.partItem) != id) {
+                                part?.removeFromWorld()
+                                part = partItem.createPart()
+                                if (part != null) {
+                                    part.setPartHostInfo(dir, this, this)
+                                    parts[dir.ordinal] = part
+                                    if (level != null && !level!!.isClientSide && !isRemoved) {
+                                        part.addToWorld()
+                                    }
+                                }
+                            }
+                            part?.readFromNBT(partTag)
+                        }
+                    }
+                } else {
+                    parts[dir.ordinal]?.removeFromWorld()
+                    parts[dir.ordinal] = null
+                }
+            }
+        }
     }
+
+    override fun getUpdatePacket(): net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener>? {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this)
+    }
+
+    override fun getUpdateTag(): CompoundTag {
+        val tag = CompoundTag()
+        saveAdditional(tag)
+        return tag
+    }
+
 }

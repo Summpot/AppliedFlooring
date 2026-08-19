@@ -73,6 +73,42 @@ open class MEFlooringBlock(
         return FULL_SHAPE
     }
 
+    override fun setPlacedBy(
+        level: Level,
+        pos: BlockPos,
+        state: BlockState,
+        placer: net.minecraft.world.entity.LivingEntity?,
+        stack: ItemStack
+    ) {
+        super.setPlacedBy(level, pos, state, placer, stack)
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            be.initNode()
+        }
+    }
+
+    override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, isMoving: Boolean) {
+        super.onPlace(state, level, pos, oldState, isMoving)
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            be.initNode()
+        }
+    }
+
+    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
+        if (state.block != newState.block) {
+            val be = level.getBlockEntity(pos)
+            if (be is MEFlooringBlockEntity) {
+                val drops = mutableListOf<ItemStack>()
+                be.addAdditionalDrops(drops, false)
+                for (drop in drops) {
+                    Block.popResource(level, pos, drop)
+                }
+            }
+        }
+        super.onRemove(state, level, pos, newState, isMoving)
+    }
+
     override fun use(
         state: BlockState,
         level: Level,
@@ -81,6 +117,32 @@ open class MEFlooringBlock(
         hand: InteractionHand,
         hit: BlockHitResult
     ): InteractionResult {
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            val heldItem = player.getItemInHand(hand)
+
+            // 1. If player is holding a Part Item (e.g. ME Terminal, Monitor, Pattern Provider, Storage Bus)
+            if (!heldItem.isEmpty && heldItem.item is appeng.api.parts.IPartItem<*>) {
+                val context = net.minecraft.world.item.context.UseOnContext(player, hand, hit)
+                val res = appeng.api.parts.PartHelper.usePartItem(context)
+                if (res.consumesAction()) {
+                    return res
+                }
+            }
+
+            // 2. If clicking on an attached part
+            val selectedPart = be.selectPartWorld(hit.location)
+            if (selectedPart.part != null) {
+                val activated = if (player.isShiftKeyDown) {
+                    selectedPart.part.onShiftActivate(player, hand, hit.location)
+                } else {
+                    selectedPart.part.onActivate(player, hand, hit.location)
+                }
+                if (activated) {
+                    return InteractionResult.sidedSuccess(level.isClientSide)
+                }
+            }
+        }
         return InteractionResult.PASS
     }
 

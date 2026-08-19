@@ -4,7 +4,7 @@ license="LGPL-3.0"
 
 [[mods]]
 modId="appliedflooring"
-version=""
+version="${version}"
 displayName="Applied Flooring"
 authors="Summpot"
 description="High-performance ME flooring blocks and embedded multipart attachments for Applied Energistics 2"
@@ -24,8 +24,8 @@ description="High-performance ME flooring blocks and embedded multipart attachme
     side="BOTH"
 
 [[dependencies.appliedflooring]]
-    modId="appliedenergistics2"
+    modId="ae2"
     mandatory=true
-    versionRange="[16,)"
+    versionRange="[19,)"
     ordering="NONE"
     side="BOTH"

@@ -5,7 +5,7 @@ plugins {
 val minecraftVersion = "1.21.1"
 val neoforgeVersion = "21.1.187"
 val architecturyVersion = "13.0.11"
-val ae2Version = "16.0.2"
+val ae2Version = "19.0.4-alpha"
 
 architectury {
     minecraft = minecraftVersion
@@ -41,6 +41,10 @@ dependencies {
     "mappings"(project.extensions.getByType<net.fabricmc.loom.api.LoomGradleExtensionAPI>().officialMojangMappings())
 
     "neoForge"("net.neoforged:neoforge:$neoforgeVersion")
+    "forgeRuntimeLibrary"("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    "forgeRuntimeLibrary"("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     modImplementation("dev.architectury:architectury-neoforge:$architecturyVersion")
 
     modImplementation("appeng:appliedenergistics2-neoforge:$ae2Version")
