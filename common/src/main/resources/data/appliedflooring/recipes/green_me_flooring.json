@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FDF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    },
+    "D": {
+      "tag": "c:dyes/green"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:green_me_flooring",
+    "count": 8
+  }
+}

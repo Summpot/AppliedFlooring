@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "appliedflooring",
+  "version": "",
+  "name": "Applied Flooring",
+  "description": "High-performance ME flooring blocks and embedded multipart attachments for Applied Energistics 2",
+  "authors": [
+    "Summpot"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Summp/AppliedFlooring"
+  },
+  "license": "LGPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.summpot.appliedflooring.fabric.AppliedFlooringFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-language-kotlin": "*",
+    "architectury": "*",
+    "appliedenergistics2": "*"
+  }
+}

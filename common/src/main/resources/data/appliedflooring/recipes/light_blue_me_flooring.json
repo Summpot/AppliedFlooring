@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FDF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    },
+    "D": {
+      "tag": "c:dyes/light_blue"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:light_blue_me_flooring",
+    "count": 8
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    "FEF",
+    " F "
+  ],
+  "key": {
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    },
+    "E": {
+      "item": "appliedenergistics2:charger"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:wireless_charger_flooring",
+    "count": 4
+  }
+}

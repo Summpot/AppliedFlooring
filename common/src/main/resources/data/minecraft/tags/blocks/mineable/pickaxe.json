@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "appliedflooring:me_flooring",
+    "appliedflooring:dense_me_flooring",
+    "appliedflooring:wireless_charger_flooring",
+    "appliedflooring:terminal_flooring"
+  ]
+}

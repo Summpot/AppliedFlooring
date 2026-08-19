@@ -1,0 +1,24 @@
+{
+  "itemGroup.appliedflooring": "Applied Flooring",
+  "block.appliedflooring.me_flooring": "ME Flooring",
+  "block.appliedflooring.dense_me_flooring": "Dense ME Flooring",
+  "block.appliedflooring.wireless_charger_flooring": "Wireless Charging ME Flooring",
+  "block.appliedflooring.terminal_flooring": "ME Terminal Relay Flooring",
+  
+  "block.appliedflooring.white_me_flooring": "White ME Flooring",
+  "block.appliedflooring.orange_me_flooring": "Orange ME Flooring",
+  "block.appliedflooring.magenta_me_flooring": "Magenta ME Flooring",
+  "block.appliedflooring.light_blue_me_flooring": "Light Blue ME Flooring",
+  "block.appliedflooring.yellow_me_flooring": "Yellow ME Flooring",
+  "block.appliedflooring.lime_me_flooring": "Lime ME Flooring",
+  "block.appliedflooring.pink_me_flooring": "Pink ME Flooring",
+  "block.appliedflooring.gray_me_flooring": "Gray ME Flooring",
+  "block.appliedflooring.light_gray_me_flooring": "Light Gray ME Flooring",
+  "block.appliedflooring.cyan_me_flooring": "Cyan ME Flooring",
+  "block.appliedflooring.purple_me_flooring": "Purple ME Flooring",
+  "block.appliedflooring.blue_me_flooring": "Blue ME Flooring",
+  "block.appliedflooring.brown_me_flooring": "Brown ME Flooring",
+  "block.appliedflooring.green_me_flooring": "Green ME Flooring",
+  "block.appliedflooring.red_me_flooring": "Red ME Flooring",
+  "block.appliedflooring.black_me_flooring": "Black ME Flooring"
+}

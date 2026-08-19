@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    "FTF",
+    " F "
+  ],
+  "key": {
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    },
+    "T": {
+      "item": "appliedenergistics2:semi_dark_monitor"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:terminal_flooring",
+    "count": 4
+  }
+}

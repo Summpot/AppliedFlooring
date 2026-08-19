@@ -1,0 +1,24 @@
+{
+  "itemGroup.appliedflooring": "应用能源地板 (Applied Flooring)",
+  "block.appliedflooring.me_flooring": "ME 地板",
+  "block.appliedflooring.dense_me_flooring": "致密 ME 地板",
+  "block.appliedflooring.wireless_charger_flooring": "无线充电 ME 地板",
+  "block.appliedflooring.terminal_flooring": "ME 终端中继地板",
+  
+  "block.appliedflooring.white_me_flooring": "白色 ME 地板",
+  "block.appliedflooring.orange_me_flooring": "橙色 ME 地板",
+  "block.appliedflooring.magenta_me_flooring": "品红色 ME 地板",
+  "block.appliedflooring.light_blue_me_flooring": "淡蓝色 ME 地板",
+  "block.appliedflooring.yellow_me_flooring": "黄色 ME 地板",
+  "block.appliedflooring.lime_me_flooring": "黄绿色 ME 地板",
+  "block.appliedflooring.pink_me_flooring": "粉红色 ME 地板",
+  "block.appliedflooring.gray_me_flooring": "灰色 ME 地板",
+  "block.appliedflooring.light_gray_me_flooring": "淡灰色 ME 地板",
+  "block.appliedflooring.cyan_me_flooring": "青色 ME 地板",
+  "block.appliedflooring.purple_me_flooring": "紫色 ME 地板",
+  "block.appliedflooring.blue_me_flooring": "蓝色 ME 地板",
+  "block.appliedflooring.brown_me_flooring": "棕色 ME 地板",
+  "block.appliedflooring.green_me_flooring": "绿色 ME 地板",
+  "block.appliedflooring.red_me_flooring": "红色 ME 地板",
+  "block.appliedflooring.black_me_flooring": "黑色 ME 地板"
+}

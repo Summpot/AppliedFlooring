@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "SCS",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "tag": "minecraft:stone_crafting_materials"
+    },
+    "C": {
+      "tag": "c:covered_dense_cables"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:dense_me_flooring",
+    "count": 8
+  }
+}

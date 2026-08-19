@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        maven { url = uri("https://maven.fabricmc.net/") }
+        maven { url = uri("https://maven.architectury.dev/") }
+        maven { url = uri("https://files.minecraftforge.net/maven/") }
+        maven { url = uri("https://maven.neoforged.net/releases/") }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = "appliedflooring"
+
+include("common-1.20.1")
+include("fabric-1.20.1")
+include("forge-1.20.1")
+
+include("common-1.19.2")
+include("fabric-1.19.2")
+include("forge-1.19.2")
+
+include("common-1.21.1")
+include("neoforge-1.21.1")
