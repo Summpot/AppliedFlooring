@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
-      "model": "appliedflooring:block/brown_me_flooring"
+    "powered=false,waterlogged=false": {
+      "model": "appliedflooring:block/brown_me_flooring_offline"
+    },
+    "powered=false,waterlogged=true": {
+      "model": "appliedflooring:block/brown_me_flooring_offline"
+    },
+    "powered=true,waterlogged=false": {
+      "model": "appliedflooring:block/brown_me_flooring_online"
+    },
+    "powered=true,waterlogged=true": {
+      "model": "appliedflooring:block/brown_me_flooring_online"
     }
   }
 }

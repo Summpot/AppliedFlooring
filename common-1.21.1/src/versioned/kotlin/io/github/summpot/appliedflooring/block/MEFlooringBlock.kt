@@ -40,16 +40,18 @@ open class MEFlooringBlock(
 
     companion object {
         val WATERLOGGED: BooleanProperty = BlockStateProperties.WATERLOGGED
+        val POWERED: BooleanProperty = BlockStateProperties.POWERED
         private val FULL_SHAPE: VoxelShape = Shapes.block()
     }
 
     init {
-        registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false))
+        registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false).setValue(POWERED, false))
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
         super.createBlockStateDefinition(builder)
         builder.add(WATERLOGGED)
+        builder.add(POWERED)
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
@@ -185,7 +187,9 @@ open class MEFlooringBlock(
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
         val fluidState = context.level.getFluidState(context.clickedPos)
-        return defaultBlockState().setValue(WATERLOGGED, fluidState.type == Fluids.WATER)
+        return defaultBlockState()
+            .setValue(WATERLOGGED, fluidState.type == Fluids.WATER)
+            .setValue(POWERED, false)
     }
 
     override fun getFluidState(state: BlockState): FluidState {

@@ -19,6 +19,7 @@ object ModBlocks {
             .strength(2.0f, 6.0f)
             .sound(SoundType.STONE)
             .requiresCorrectToolForDrops()
+            .lightLevel { state -> if (state.getValue(MEFlooringBlock.POWERED)) 7 else 0 }
     }
 
     val ME_FLOORING: RegistrySupplier<Block> = BLOCKS.register("me_flooring") {

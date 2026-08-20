@@ -62,17 +62,33 @@ open class MEFlooringBlockEntity(
     object NodeListener : IGridNodeListener<MEFlooringBlockEntity> {
         override fun onInWorldConnectionChanged(nodeOwner: MEFlooringBlockEntity, node: IGridNode) {
             nodeOwner.markForUpdate()
+            nodeOwner.updatePowerState()
         }
 
         override fun onSaveChanges(nodeOwner: MEFlooringBlockEntity, node: IGridNode) {
             nodeOwner.markForSave()
+            nodeOwner.updatePowerState()
         }
     }
 
     open fun onEntitySteppedOn(entity: Entity) {
     }
 
+    fun updatePowerState() {
+        val lvl = level ?: return
+        if (lvl.isClientSide || isRemoved) return
+        val isPowered = mainNode.isReady && (mainNode.grid?.energyService?.isNetworkPowered ?: false)
+        val state = blockState
+        if (state.hasProperty(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) &&
+            state.getValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) != isPowered
+        ) {
+            lvl.setBlock(worldPosition, state.setValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED, isPowered), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+        }
+    }
+
     fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
+        updatePowerState()
+
         tickCounter++
         if (tickCounter % 10 != 0) return
 
@@ -124,6 +140,7 @@ open class MEFlooringBlockEntity(
             for (part in parts) {
                 part?.addToWorld()
             }
+            updatePowerState()
         }
     }
 
