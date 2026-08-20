@@ -21,9 +21,6 @@ object ModCreativeTabs {
                 .icon { ItemStack(ModItems.ME_FLOORING.get()) }
                 .displayItems { _, output ->
                     output.accept(ModItems.ME_FLOORING.get())
-                    output.accept(ModItems.DENSE_ME_FLOORING.get())
-                    output.accept(ModItems.WIRELESS_CHARGER_FLOORING.get())
-                    output.accept(ModItems.TERMINAL_FLOORING.get())
                     for (itemSupplier in ModItems.COLORED_ME_FLOORING.values) {
                         output.accept(itemSupplier.get())
                     }

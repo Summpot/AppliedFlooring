@@ -3,10 +3,7 @@ package io.github.summpot.appliedflooring.registry
 import dev.architectury.registry.registries.DeferredRegister
 import dev.architectury.registry.registries.RegistrySupplier
 import io.github.summpot.appliedflooring.AppliedFlooringMod
-import io.github.summpot.appliedflooring.blockentity.DenseMEFlooringBlockEntity
 import io.github.summpot.appliedflooring.blockentity.MEFlooringBlockEntity
-import io.github.summpot.appliedflooring.blockentity.TerminalFlooringBlockEntity
-import io.github.summpot.appliedflooring.blockentity.WirelessChargerFlooringBlockEntity
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.world.level.block.Block
@@ -27,33 +24,6 @@ object ModBlockEntities {
                 MEFlooringBlockEntity(ME_FLOORING_BE.get(), pos, state)
             },
             *validBlocks.toTypedArray()
-        ).build(null)
-    }
-
-    val DENSE_ME_FLOORING_BE: RegistrySupplier<BlockEntityType<DenseMEFlooringBlockEntity>> = BLOCK_ENTITIES.register("dense_me_flooring") {
-        BlockEntityType.Builder.of(
-            BlockEntityType.BlockEntitySupplier { pos: BlockPos, state: BlockState ->
-                DenseMEFlooringBlockEntity(DENSE_ME_FLOORING_BE.get(), pos, state)
-            },
-            ModBlocks.DENSE_ME_FLOORING.get()
-        ).build(null)
-    }
-
-    val WIRELESS_CHARGER_FLOORING_BE: RegistrySupplier<BlockEntityType<WirelessChargerFlooringBlockEntity>> = BLOCK_ENTITIES.register("wireless_charger_flooring") {
-        BlockEntityType.Builder.of(
-            BlockEntityType.BlockEntitySupplier { pos: BlockPos, state: BlockState ->
-                WirelessChargerFlooringBlockEntity(WIRELESS_CHARGER_FLOORING_BE.get(), pos, state)
-            },
-            ModBlocks.WIRELESS_CHARGER_FLOORING.get()
-        ).build(null)
-    }
-
-    val TERMINAL_FLOORING_BE: RegistrySupplier<BlockEntityType<TerminalFlooringBlockEntity>> = BLOCK_ENTITIES.register("terminal_flooring") {
-        BlockEntityType.Builder.of(
-            BlockEntityType.BlockEntitySupplier { pos: BlockPos, state: BlockState ->
-                TerminalFlooringBlockEntity(TERMINAL_FLOORING_BE.get(), pos, state)
-            },
-            ModBlocks.TERMINAL_FLOORING.get()
         ).build(null)
     }
 

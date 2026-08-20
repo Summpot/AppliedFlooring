@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
 import net.minecraft.world.level.block.SimpleWaterloggedBlock
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
@@ -33,8 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape
 
 open class MEFlooringBlock(
     properties: BlockBehaviour.Properties,
-    val color: AEColor = AEColor.TRANSPARENT,
-    val isDense: Boolean = false
+    val color: AEColor = AEColor.TRANSPARENT
 ) : Block(properties), EntityBlock, SimpleWaterloggedBlock {
 
     companion object {
@@ -52,7 +53,20 @@ open class MEFlooringBlock(
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
-        return MEFlooringBlockEntity(ModBlockEntities.ME_FLOORING_BE.get(), pos, state, isDense, color)
+        return MEFlooringBlockEntity(ModBlockEntities.ME_FLOORING_BE.get(), pos, state, isDenseCable = true, currentColor = color)
+    }
+
+    override fun <T : BlockEntity?> getTicker(
+        level: Level,
+        state: BlockState,
+        blockEntityType: BlockEntityType<T>
+    ): BlockEntityTicker<T>? {
+        if (level.isClientSide) return null
+        return BlockEntityTicker { lvl, pos, st, be ->
+            if (be is MEFlooringBlockEntity) {
+                be.serverTick(lvl, pos, st)
+            }
+        }
     }
 
     override fun getShape(

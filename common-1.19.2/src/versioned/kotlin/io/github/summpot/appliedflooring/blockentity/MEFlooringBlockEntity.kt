@@ -1,11 +1,15 @@
 package io.github.summpot.appliedflooring.blockentity
 
+import appeng.api.config.Actionable
+import appeng.api.config.PowerMultiplier
+import appeng.api.implementations.items.IAEItemPowerStorage
 import appeng.api.networking.GridFlags
 import appeng.api.networking.GridHelper
 import appeng.api.networking.IGridNode
 import appeng.api.networking.IGridNodeListener
 import appeng.api.networking.IInWorldGridNodeHost
 import appeng.api.networking.IManagedGridNode
+import appeng.api.networking.energy.IEnergyService
 import appeng.api.parts.IFacadeContainer
 import appeng.api.parts.IPart
 import appeng.api.parts.IPartHost
@@ -26,6 +30,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
@@ -36,11 +41,12 @@ open class MEFlooringBlockEntity(
     type: BlockEntityType<*>,
     pos: BlockPos,
     state: BlockState,
-    val isDenseCable: Boolean = false,
+    val isDenseCable: Boolean = true,
     var currentColor: AEColor = AEColor.TRANSPARENT
 ) : BlockEntity(type, pos, state), IInWorldGridNodeHost, IPartHost {
 
     private val parts: Array<IPart?> = arrayOfNulls(6)
+    private var tickCounter = 0
 
     val mainNode: IManagedGridNode = GridHelper.createManagedNode(this, NodeListener)
         .setFlags(GridFlags.PREFERRED)
@@ -50,7 +56,7 @@ open class MEFlooringBlockEntity(
 
     init {
         mainNode.setGridColor(currentColor)
-        mainNode.setTagName(if (isDenseCable) "dense_flooring" else "flooring")
+        mainNode.setTagName("flooring")
     }
 
     object NodeListener : IGridNodeListener<MEFlooringBlockEntity> {
@@ -67,6 +73,49 @@ open class MEFlooringBlockEntity(
     }
 
     open fun onEntitySteppedOn(entity: Entity) {
+    }
+
+    fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
+        tickCounter++
+        if (tickCounter % 10 != 0) return
+
+        val grid = mainNode.grid ?: return
+        val energyService = grid.energyService ?: return
+
+        val checkArea = AABB(pos.above())
+        val players = level.getEntitiesOfClass(Player::class.java, checkArea)
+        if (players.isEmpty()) return
+
+        for (player in players) {
+            chargePlayerItems(player, energyService)
+        }
+    }
+
+    private fun chargePlayerItems(player: Player, energyService: IEnergyService) {
+        val maxTransferPerTick = 10000.0
+
+        for (i in 0 until player.inventory.containerSize) {
+            val stack = player.inventory.getItem(i)
+            if (stack.isEmpty) continue
+            chargeItemStack(stack, energyService, maxTransferPerTick)
+        }
+    }
+
+    private fun chargeItemStack(stack: ItemStack, energyService: IEnergyService, maxTransfer: Double) {
+        val item = stack.item
+        if (item is IAEItemPowerStorage) {
+            val current = item.getAECurrentPower(stack)
+            val max = item.getAEMaxPower(stack)
+            val needed = max - current
+            if (needed > 0.0) {
+                val toExtract = minOf(needed, maxTransfer)
+                val extracted = energyService.extractAEPower(toExtract, Actionable.SIMULATE, PowerMultiplier.CONFIG)
+                if (extracted > 0.0) {
+                    val actualExtracted = energyService.extractAEPower(extracted, Actionable.MODULATE, PowerMultiplier.CONFIG)
+                    item.injectAEPower(stack, actualExtracted, Actionable.MODULATE)
+                }
+            }
+        }
     }
 
     fun initNode() {
@@ -93,7 +142,7 @@ open class MEFlooringBlockEntity(
                 return part.externalCableConnectionType
             }
         }
-        return if (isDenseCable) AECableType.DENSE_SMART else AECableType.SMART
+        return AECableType.DENSE_SMART
     }
 
     override fun isBlocked(side: Direction?): Boolean {
@@ -143,14 +192,6 @@ open class MEFlooringBlockEntity(
         if (item !is IPartItem<*>) return false
         val dummy = item.createPart()
         if (dummy is appeng.api.implementations.parts.ICablePart) return false
-
-        if (isDenseCable) {
-            val dummy = item.createPart()
-            if (dummy != null && !dummy.canBePlacedOn(appeng.api.parts.BusSupport.DENSE_CABLE)) {
-                return false
-            }
-        }
-
         return parts[side.ordinal] == null
     }
 
@@ -292,7 +333,6 @@ open class MEFlooringBlockEntity(
             lvl.updateNeighborsAt(worldPosition, blockState.block)
         }
     }
-
 
     override fun isInWorld(): Boolean {
         return level != null && !isRemoved

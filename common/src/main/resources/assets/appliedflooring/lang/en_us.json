@@ -1,10 +1,6 @@
 {
   "itemGroup.appliedflooring": "Applied Flooring",
   "block.appliedflooring.me_flooring": "ME Flooring",
-  "block.appliedflooring.dense_me_flooring": "Dense ME Flooring",
-  "block.appliedflooring.wireless_charger_flooring": "Wireless Charging ME Flooring",
-  "block.appliedflooring.terminal_flooring": "ME Terminal Relay Flooring",
-  
   "block.appliedflooring.white_me_flooring": "White ME Flooring",
   "block.appliedflooring.orange_me_flooring": "Orange ME Flooring",
   "block.appliedflooring.magenta_me_flooring": "Magenta ME Flooring",

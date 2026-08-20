@@ -16,8 +16,5 @@ class AppliedFlooringNeoForge(bus: IEventBus) {
 
     private fun registerCapabilities(event: RegisterCapabilitiesEvent) {
         event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, ModBlockEntities.ME_FLOORING_BE.get()) { be, _ -> be }
-        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, ModBlockEntities.DENSE_ME_FLOORING_BE.get()) { be, _ -> be }
-        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, ModBlockEntities.TERMINAL_FLOORING_BE.get()) { be, _ -> be }
-        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, ModBlockEntities.WIRELESS_CHARGER_FLOORING_BE.get()) { be, _ -> be }
     }
 }
