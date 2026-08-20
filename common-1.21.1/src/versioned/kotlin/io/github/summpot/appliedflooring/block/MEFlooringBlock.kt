@@ -89,26 +89,14 @@ open class MEFlooringBlock(
         return FULL_SHAPE
     }
 
-    override fun setPlacedBy(
-        level: Level,
-        pos: BlockPos,
-        state: BlockState,
-        placer: net.minecraft.world.entity.LivingEntity?,
-        stack: ItemStack
-    ) {
-        super.setPlacedBy(level, pos, state, placer, stack)
-        val be = level.getBlockEntity(pos)
-        if (be is MEFlooringBlockEntity) {
-            be.initNode()
-        }
-    }
 
-    override fun onPlace(state: BlockState, level: Level, pos: BlockPos, oldState: BlockState, isMoving: Boolean) {
-        super.onPlace(state, level, pos, oldState, isMoving)
-        val be = level.getBlockEntity(pos)
-        if (be is MEFlooringBlockEntity) {
-            be.initNode()
+
+    override fun getDrops(state: BlockState, builder: net.minecraft.world.level.storage.loot.LootParams.Builder): MutableList<ItemStack> {
+        val drops = super.getDrops(state, builder)
+        if (drops.isEmpty()) {
+            return mutableListOf(ItemStack(this))
         }
+        return drops
     }
 
     override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
@@ -156,6 +144,14 @@ open class MEFlooringBlock(
     ): ItemInteractionResult {
         val be = level.getBlockEntity(pos)
         if (be is MEFlooringBlockEntity) {
+            // 0. Wrench interaction (dismantle part or dismantle floor block)
+            if (io.github.summpot.appliedflooring.util.FlooringWrenchHelper.isWrench(heldItem) && player.isShiftKeyDown) {
+                val res = be.disassembleWithWrench(player, level, hit.location, heldItem)
+                if (res.consumesAction()) {
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide)
+                }
+            }
+
             // 1. If player is holding a Part Item (e.g. ME Terminal, Monitor, Pattern Provider, Storage Bus)
             if (heldItem.item is appeng.api.parts.IPartItem<*>) {
                 val context = net.minecraft.world.item.context.UseOnContext(player, hand, hit)

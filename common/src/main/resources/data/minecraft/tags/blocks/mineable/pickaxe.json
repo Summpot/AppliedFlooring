@@ -4,6 +4,22 @@
     "appliedflooring:me_flooring",
     "appliedflooring:dense_me_flooring",
     "appliedflooring:wireless_charger_flooring",
-    "appliedflooring:terminal_flooring"
+    "appliedflooring:terminal_flooring",
+    "appliedflooring:white_me_flooring",
+    "appliedflooring:orange_me_flooring",
+    "appliedflooring:magenta_me_flooring",
+    "appliedflooring:light_blue_me_flooring",
+    "appliedflooring:yellow_me_flooring",
+    "appliedflooring:lime_me_flooring",
+    "appliedflooring:pink_me_flooring",
+    "appliedflooring:gray_me_flooring",
+    "appliedflooring:light_gray_me_flooring",
+    "appliedflooring:cyan_me_flooring",
+    "appliedflooring:purple_me_flooring",
+    "appliedflooring:blue_me_flooring",
+    "appliedflooring:brown_me_flooring",
+    "appliedflooring:green_me_flooring",
+    "appliedflooring:red_me_flooring",
+    "appliedflooring:black_me_flooring"
   ]
 }

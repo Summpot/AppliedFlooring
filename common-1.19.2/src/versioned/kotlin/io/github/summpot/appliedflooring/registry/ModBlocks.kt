@@ -16,9 +16,8 @@ object ModBlocks {
 
     private fun defaultProps(): BlockBehaviour.Properties {
         return BlockBehaviour.Properties.of(Material.STONE)
-            .strength(2.0f, 6.0f)
+            .strength(1.5f, 6.0f)
             .sound(SoundType.STONE)
-            .requiresCorrectToolForDrops()
             .lightLevel { state -> if (state.getValue(MEFlooringBlock.POWERED)) 7 else 0 }
     }
 

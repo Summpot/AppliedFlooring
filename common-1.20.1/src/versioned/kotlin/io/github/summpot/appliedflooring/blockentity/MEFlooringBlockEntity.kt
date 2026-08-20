@@ -43,7 +43,7 @@ open class MEFlooringBlockEntity(
     state: BlockState,
     val isDenseCable: Boolean = true,
     var currentColor: AEColor = AEColor.TRANSPARENT
-) : BlockEntity(type, pos, state), IInWorldGridNodeHost, IPartHost {
+) : BlockEntity(type, pos, state), IInWorldGridNodeHost, IPartHost, appeng.api.implementations.blockentities.IColorableBlockEntity {
 
     private val parts: Array<IPart?> = arrayOfNulls(6)
     private var tickCounter = 0
@@ -62,38 +62,35 @@ open class MEFlooringBlockEntity(
     object NodeListener : IGridNodeListener<MEFlooringBlockEntity> {
         override fun onInWorldConnectionChanged(nodeOwner: MEFlooringBlockEntity, node: IGridNode) {
             nodeOwner.markForUpdate()
-            nodeOwner.updatePowerState()
         }
 
         override fun onSaveChanges(nodeOwner: MEFlooringBlockEntity, node: IGridNode) {
             nodeOwner.markForSave()
-            nodeOwner.updatePowerState()
+        }
+
+        override fun onStateChanged(nodeOwner: MEFlooringBlockEntity, node: IGridNode, state: IGridNodeListener.State) {
+            if (state == IGridNodeListener.State.POWER) {
+                nodeOwner.markForUpdate()
+            }
         }
     }
 
     open fun onEntitySteppedOn(entity: Entity) {
     }
 
-    fun updatePowerState() {
-        val lvl = level ?: return
-        if (lvl.isClientSide || isRemoved) return
-        val isPowered = mainNode.isReady && (mainNode.grid?.energyService?.isNetworkPowered ?: false)
-        val state = blockState
-        if (state.hasProperty(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) &&
-            state.getValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) != isPowered
-        ) {
-            lvl.setBlock(worldPosition, state.setValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED, isPowered), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
-        }
+    fun isPowered(): Boolean {
+        if (!mainNode.isReady) return false
+        val grid = mainNode.grid ?: return false
+        return grid.energyService?.isNetworkPowered ?: false
     }
 
     fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
-        updatePowerState()
-
         tickCounter++
         if (tickCounter % 10 != 0) return
 
         val grid = mainNode.grid ?: return
         val energyService = grid.energyService ?: return
+        if (!energyService.isNetworkPowered) return
 
         val checkArea = AABB(pos.above())
         val players = level.getEntitiesOfClass(Player::class.java, checkArea)
@@ -105,33 +102,36 @@ open class MEFlooringBlockEntity(
     }
 
     private fun chargePlayerItems(player: Player, energyService: IEnergyService) {
-        val maxTransferPerTick = 10000.0
-
         for (i in 0 until player.inventory.containerSize) {
             val stack = player.inventory.getItem(i)
             if (stack.isEmpty) continue
-            chargeItemStack(stack, energyService, maxTransferPerTick)
+            chargeItemStack(stack, energyService)
         }
     }
 
-    private fun chargeItemStack(stack: ItemStack, energyService: IEnergyService, maxTransfer: Double) {
+    private fun chargeItemStack(stack: ItemStack, energyService: IEnergyService) {
         val item = stack.item
         if (item is IAEItemPowerStorage) {
-            val current = item.getAECurrentPower(stack)
-            val max = item.getAEMaxPower(stack)
-            val needed = max - current
+            if (item.getPowerFlow(stack) == appeng.api.config.AccessRestriction.READ) return
+            val maxPower = item.getAEMaxPower(stack)
+            if (maxPower <= 0.0) return
+            val currentPower = item.getAECurrentPower(stack)
+            val needed = maxPower - currentPower
             if (needed > 0.0) {
-                val toExtract = minOf(needed, maxTransfer)
-                val extracted = energyService.extractAEPower(toExtract, Actionable.SIMULATE, PowerMultiplier.CONFIG)
+                val rate = maxOf(item.getChargeRate(stack) * 10.0, 10000.0)
+                val toExtract = minOf(needed, rate)
+                val extracted = energyService.extractAEPower(toExtract, Actionable.MODULATE, PowerMultiplier.ONE)
                 if (extracted > 0.0) {
-                    val actualExtracted = energyService.extractAEPower(extracted, Actionable.MODULATE, PowerMultiplier.CONFIG)
-                    item.injectAEPower(stack, actualExtracted, Actionable.MODULATE)
+                    val notStored = item.injectAEPower(stack, extracted, Actionable.MODULATE)
+                    if (notStored > 0.0) {
+                        energyService.injectPower(notStored, Actionable.MODULATE)
+                    }
                 }
             }
         }
     }
 
-    fun initNode() {
+    fun onReady() {
         val lvl = level
         if (lvl != null && !lvl.isClientSide && !isRemoved) {
             if (!mainNode.isReady) {
@@ -140,13 +140,8 @@ open class MEFlooringBlockEntity(
             for (part in parts) {
                 part?.addToWorld()
             }
-            updatePowerState()
+            markForUpdate()
         }
-    }
-
-    override fun setLevel(level: Level) {
-        super.setLevel(level)
-        initNode()
     }
 
     override fun getCableConnectionType(dir: Direction?): AECableType {
@@ -188,7 +183,7 @@ open class MEFlooringBlockEntity(
 
     override fun clearRemoved() {
         super.clearRemoved()
-        initNode()
+        GridHelper.onFirstTick(this) { it.onReady() }
     }
 
     override fun getFacadeContainer(): IFacadeContainer? {
@@ -274,10 +269,16 @@ open class MEFlooringBlockEntity(
     }
 
     override fun markForUpdate() {
-        val lvl = level
-        if (lvl != null && !lvl.isClientSide) {
-            val state = blockState
-            lvl.sendBlockUpdated(worldPosition, state, state, 3)
+        val lvl = level ?: return
+        if (lvl.isClientSide || isRemoved) return
+        val isPowered = isPowered()
+        val state = blockState
+        if (state.hasProperty(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) &&
+            state.getValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) != isPowered
+        ) {
+            lvl.setBlock(worldPosition, state.setValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED, isPowered), net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+        } else {
+            lvl.sendBlockUpdated(worldPosition, state, state, net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
         }
     }
 
@@ -313,8 +314,14 @@ open class MEFlooringBlockEntity(
             absX >= absY && absX >= absZ -> if (dx > 0) Direction.EAST else Direction.WEST
             else -> if (dz > 0) Direction.SOUTH else Direction.NORTH
         }
-        val part = parts[side.ordinal]
-        return if (part != null) SelectedPart(part, side) else SelectedPart()
+        val part = parts[side.ordinal] ?: return SelectedPart()
+        val (u, v) = when (side.axis) {
+            Direction.Axis.Y -> Pair(dx, dz)
+            Direction.Axis.Z -> Pair(dx, dy)
+            Direction.Axis.X -> Pair(dz, dy)
+        }
+        val isHittingPart = kotlin.math.abs(u) <= 0.35 && kotlin.math.abs(v) <= 0.35
+        return if (isHittingPart) SelectedPart(part, side) else SelectedPart()
     }
 
     override fun getCollisionShape(context: CollisionContext?): VoxelShape {
@@ -359,7 +366,60 @@ open class MEFlooringBlockEntity(
         return level != null && !isRemoved
     }
 
-    fun recolourBlock(side: Direction?, newColor: AEColor?, who: Player?): Boolean {
+    fun disassembleWithWrench(
+        player: Player,
+        level: Level,
+        hitPos: Vec3,
+        wrench: ItemStack
+    ): net.minecraft.world.InteractionResult {
+        if (!level.isClientSide) {
+            val sp = selectPartWorld(hitPos)
+            if (sp.part != null) {
+                // 1. Dismantle clicked Part only
+                val drops = mutableListOf<ItemStack>()
+                sp.part.addPartDrop(drops, true)
+                sp.part.addAdditionalDrops(drops, true)
+                removePartFromSide(sp.side)
+                for (item in drops) {
+                    player.inventory.placeItemBackInInventory(item)
+                }
+            } else {
+                // 2. Dismantle floor tile only, preserving parts in world via CableBus
+                val existingParts = mutableListOf<Pair<Direction, IPartItem<*>>>()
+                for (dir in Direction.values()) {
+                    val p = parts[dir.ordinal]
+                    if (p != null) {
+                        existingParts.add(Pair(dir, p.partItem))
+                    }
+                }
+
+                player.inventory.placeItemBackInInventory(ItemStack(blockState.block))
+                clearContainer()
+
+                val pos = worldPosition
+                val state = blockState
+                val block = state.block
+                block.playerWillDestroy(level, pos, state, player)
+
+                if (existingParts.isEmpty()) {
+                    level.removeBlock(pos, false)
+                    block.destroy(level, pos, state)
+                } else {
+                    level.removeBlock(pos, false)
+                    val host = appeng.api.parts.PartHelper.getOrPlacePartHost(level, pos, true, player)
+                    if (host != null) {
+                        for ((dir, pItem) in existingParts) {
+                            host.addPart(pItem, dir, player)
+                        }
+                    }
+                }
+            }
+            level.playSound(null, worldPosition, net.minecraft.sounds.SoundEvents.ITEM_FRAME_REMOVE_ITEM, net.minecraft.sounds.SoundSource.BLOCKS, 0.7f, 1.0f)
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide)
+    }
+
+    override fun recolourBlock(side: Direction?, newColor: AEColor?, who: Player?): Boolean {
         if (newColor != null && newColor != currentColor) {
             currentColor = newColor
             mainNode.setGridColor(newColor)
