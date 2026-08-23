@@ -99,6 +99,41 @@ open class MEFlooringBlock(
         return drops
     }
 
+    override fun isSignalSource(state: BlockState): Boolean {
+        return true
+    }
+
+    override fun getSignal(state: BlockState, level: BlockGetter, pos: BlockPos, side: Direction): Int {
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            return be.isProvidingWeakPower(side.opposite)
+        }
+        return 0
+    }
+
+    override fun getDirectSignal(state: BlockState, level: BlockGetter, pos: BlockPos, side: Direction): Int {
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            return be.isProvidingStrongPower(side.opposite)
+        }
+        return 0
+    }
+
+    override fun neighborChanged(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        neighborBlock: Block,
+        neighborPos: BlockPos,
+        movedByPiston: Boolean
+    ) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston)
+        val be = level.getBlockEntity(pos)
+        if (be is MEFlooringBlockEntity) {
+            be.onNeighborChanged(level, pos, neighborPos)
+        }
+    }
+
     override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
         if (state.block != newState.block) {
             val be = level.getBlockEntity(pos)

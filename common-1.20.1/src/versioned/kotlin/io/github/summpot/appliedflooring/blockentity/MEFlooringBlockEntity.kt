@@ -26,6 +26,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
@@ -48,15 +49,29 @@ open class MEFlooringBlockEntity(
     private val parts: Array<IPart?> = arrayOfNulls(6)
     private var tickCounter = 0
 
-    val mainNode: IManagedGridNode = GridHelper.createManagedNode(this, NodeListener)
-        .setFlags(GridFlags.PREFERRED)
-        .setIdlePowerUsage(0.0)
-        .setInWorldNode(true)
-        .setExposedOnSides(EnumSet.allOf(Direction::class.java))
+    val mainNode: IManagedGridNode = GridHelper.createManagedNode(this, NodeListener).apply {
+        if (isDenseCable) {
+            setFlags(GridFlags.PREFERRED, GridFlags.DENSE_CAPACITY)
+        } else {
+            setFlags(GridFlags.PREFERRED)
+        }
+        setIdlePowerUsage(0.0)
+        setInWorldNode(true)
+        setExposedOnSides(EnumSet.allOf(Direction::class.java))
+    }
 
     init {
         mainNode.setGridColor(currentColor)
         mainNode.setTagName("flooring")
+    }
+
+    private fun connectPartToGrid(part: IPart) {
+        val main = mainNode.node ?: return
+        val partNode = part.gridNode ?: return
+        val alreadyConnected = main.connections.any { it.a() == partNode || it.b() == partNode }
+        if (!alreadyConnected) {
+            GridHelper.createConnection(main, partNode)
+        }
     }
 
     object NodeListener : IGridNodeListener<MEFlooringBlockEntity> {
@@ -137,8 +152,13 @@ open class MEFlooringBlockEntity(
             if (!mainNode.isReady) {
                 mainNode.create(lvl, worldPosition)
             }
-            for (part in parts) {
-                part?.addToWorld()
+            for (dir in Direction.values()) {
+                val part = parts[dir.ordinal]
+                if (part != null) {
+                    part.setPartHostInfo(dir, this, this)
+                    part.addToWorld()
+                    connectPartToGrid(part)
+                }
             }
             markForUpdate()
         }
@@ -216,6 +236,7 @@ open class MEFlooringBlockEntity(
         val lvl = level
         if (lvl != null && !lvl.isClientSide && !isRemoved) {
             part.addToWorld()
+            connectPartToGrid(part)
         }
         markForUpdate()
         markForSave()
@@ -332,9 +353,42 @@ open class MEFlooringBlockEntity(
         setChanged()
     }
 
+    fun updateConnections() {
+        val sides = EnumSet.allOf(Direction::class.java)
+        for (s in Direction.values()) {
+            if (parts[s.ordinal] != null || isBlocked(s)) {
+                sides.remove(s)
+            }
+        }
+        mainNode.setExposedOnSides(sides)
+    }
+
     override fun partChanged() {
+        updateConnections()
         markForSave()
         markForUpdate()
+        notifyNeighbors()
+    }
+
+    fun isProvidingStrongPower(side: Direction): Int {
+        val part = parts[side.ordinal]
+        return part?.isProvidingStrongPower ?: 0
+    }
+
+    fun isProvidingWeakPower(side: Direction): Int {
+        val part = parts[side.ordinal]
+        return part?.isProvidingWeakPower ?: 0
+    }
+
+    fun canConnectRedstone(opposite: Direction): Boolean {
+        val part = parts[opposite.ordinal]
+        return part?.canConnectRedstone() ?: false
+    }
+
+    fun onNeighborChanged(level: BlockGetter, pos: BlockPos, neighbor: BlockPos) {
+        for (part in parts) {
+            part?.onNeighborChanged(level, pos, neighbor)
+        }
     }
 
     override fun hasRedstone(): Boolean {
@@ -477,6 +531,7 @@ open class MEFlooringBlockEntity(
                                     parts[dir.ordinal] = part
                                     if (level != null && !level!!.isClientSide && !isRemoved) {
                                         part.addToWorld()
+                                        connectPartToGrid(part)
                                     }
                                 }
                             }

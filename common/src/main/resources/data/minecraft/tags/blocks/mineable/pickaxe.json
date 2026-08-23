@@ -2,9 +2,6 @@
   "replace": false,
   "values": [
     "appliedflooring:me_flooring",
-    "appliedflooring:dense_me_flooring",
-    "appliedflooring:wireless_charger_flooring",
-    "appliedflooring:terminal_flooring",
     "appliedflooring:white_me_flooring",
     "appliedflooring:orange_me_flooring",
     "appliedflooring:magenta_me_flooring",
