@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " Q ",
+    "SFS",
+    " Q "
+  ],
+  "key": {
+    "Q": {
+      "tag": "c:glass_blocks"
+    },
+    "S": {
+      "tag": "minecraft:stone_crafting_materials"
+    },
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:me_laser_connector",
+    "count": 1
+  }
+}

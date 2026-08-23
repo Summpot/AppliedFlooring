@@ -42,6 +42,7 @@ dependencies {
     modImplementation("dev.architectury:architectury-fabric:$architecturyVersion")
 
     modImplementation("appeng:appliedenergistics2-fabric:$ae2Version")
+    modApi("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:5.0.11")
 
     common(project(path = ":common-1.19.2", configuration = "namedElements")) {
         isTransitive = false

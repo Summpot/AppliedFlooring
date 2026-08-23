@@ -4,7 +4,9 @@ import appeng.api.util.AEColor
 import dev.architectury.registry.registries.DeferredRegister
 import dev.architectury.registry.registries.RegistrySupplier
 import io.github.summpot.appliedflooring.AppliedFlooringMod
+import io.github.summpot.appliedflooring.block.MEElevatorBlock
 import io.github.summpot.appliedflooring.block.MEFlooringBlock
+import io.github.summpot.appliedflooring.block.MELaserConnectorBlock
 import net.minecraft.core.registries.Registries
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.SoundType
@@ -30,6 +32,32 @@ object ModBlocks {
             val name = "${color.registryPrefix}_me_flooring"
             BLOCKS.register(name) {
                 MEFlooringBlock(defaultProps(), color) as Block
+            }
+        }
+
+    val ME_LASER_CONNECTOR: RegistrySupplier<Block> = BLOCKS.register("me_laser_connector") {
+        MELaserConnectorBlock(defaultProps(), AEColor.TRANSPARENT) as Block
+    }
+
+    val COLORED_ME_LASER_CONNECTOR: Map<AEColor, RegistrySupplier<Block>> = AEColor.values()
+        .filter { it != AEColor.TRANSPARENT }
+        .associateWith { color ->
+            val name = "${color.registryPrefix}_me_laser_connector"
+            BLOCKS.register(name) {
+                MELaserConnectorBlock(defaultProps(), color) as Block
+            }
+        }
+
+    val ME_ELEVATOR: RegistrySupplier<Block> = BLOCKS.register("me_elevator") {
+        MEElevatorBlock(defaultProps(), AEColor.TRANSPARENT) as Block
+    }
+
+    val COLORED_ME_ELEVATOR: Map<AEColor, RegistrySupplier<Block>> = AEColor.values()
+        .filter { it != AEColor.TRANSPARENT }
+        .associateWith { color ->
+            val name = "${color.registryPrefix}_me_elevator"
+            BLOCKS.register(name) {
+                MEElevatorBlock(defaultProps(), color) as Block
             }
         }
 

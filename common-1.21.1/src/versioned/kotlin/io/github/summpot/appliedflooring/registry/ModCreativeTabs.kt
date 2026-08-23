@@ -24,6 +24,14 @@ object ModCreativeTabs {
                     for (itemSupplier in ModItems.COLORED_ME_FLOORING.values) {
                         output.accept(itemSupplier.get())
                     }
+                    output.accept(ModItems.ME_LASER_CONNECTOR.get())
+                    for (itemSupplier in ModItems.COLORED_ME_LASER_CONNECTOR.values) {
+                        output.accept(itemSupplier.get())
+                    }
+                    output.accept(ModItems.ME_ELEVATOR.get())
+                    for (itemSupplier in ModItems.COLORED_ME_ELEVATOR.values) {
+                        output.accept(itemSupplier.get())
+                    }
                 }
         }
     }

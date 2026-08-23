@@ -22,6 +22,30 @@ object ModItems {
             }
         }
 
+    val ME_LASER_CONNECTOR: RegistrySupplier<Item> = ITEMS.register("me_laser_connector") {
+        BlockItem(ModBlocks.ME_LASER_CONNECTOR.get(), Item.Properties().tab(ModCreativeTabs.TAB))
+    }
+
+    val COLORED_ME_LASER_CONNECTOR: Map<appeng.api.util.AEColor, RegistrySupplier<Item>> = ModBlocks.COLORED_ME_LASER_CONNECTOR
+        .mapValues { (color, blockSupplier) ->
+            val name = "${color.registryPrefix}_me_laser_connector"
+            ITEMS.register(name) {
+                BlockItem(blockSupplier.get(), Item.Properties().tab(ModCreativeTabs.TAB))
+            }
+        }
+
+    val ME_ELEVATOR: RegistrySupplier<Item> = ITEMS.register("me_elevator") {
+        BlockItem(ModBlocks.ME_ELEVATOR.get(), Item.Properties().tab(ModCreativeTabs.TAB))
+    }
+
+    val COLORED_ME_ELEVATOR: Map<appeng.api.util.AEColor, RegistrySupplier<Item>> = ModBlocks.COLORED_ME_ELEVATOR
+        .mapValues { (color, blockSupplier) ->
+            val name = "${color.registryPrefix}_me_elevator"
+            ITEMS.register(name) {
+                BlockItem(blockSupplier.get(), Item.Properties().tab(ModCreativeTabs.TAB))
+            }
+        }
+
     fun register() {
         ITEMS.register()
     }

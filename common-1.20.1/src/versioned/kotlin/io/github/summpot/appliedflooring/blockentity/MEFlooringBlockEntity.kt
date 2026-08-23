@@ -99,7 +99,7 @@ open class MEFlooringBlockEntity(
         return grid.energyService?.isNetworkPowered ?: false
     }
 
-    fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
+    open fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
         tickCounter++
         if (tickCounter % 10 != 0) return
 

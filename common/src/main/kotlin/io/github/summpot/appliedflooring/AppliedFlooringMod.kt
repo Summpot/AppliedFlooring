@@ -2,11 +2,16 @@ package io.github.summpot.appliedflooring
 
 import dev.architectury.utils.Env
 import dev.architectury.utils.EnvExecutor
+import io.github.summpot.appliedflooring.block.MEElevatorBlock
 import io.github.summpot.appliedflooring.client.MEFlooringClient
 import io.github.summpot.appliedflooring.registry.ModBlockEntities
 import io.github.summpot.appliedflooring.registry.ModBlocks
 import io.github.summpot.appliedflooring.registry.ModCreativeTabs
 import io.github.summpot.appliedflooring.registry.ModItems
+import io.github.summpot.appliedflooring.util.ElevatorTeleportHelper
+import io.github.summpot.appliedflooring.util.ElevatorTracker
+import io.github.summpot.appliedflooring.util.isOnGroundCompat
+import net.minecraft.server.level.ServerPlayer
 import org.slf4j.LoggerFactory
 
 object AppliedFlooringMod {
@@ -57,6 +62,31 @@ object AppliedFlooringMod {
                 }
             }
             return@register dev.architectury.event.EventResult.pass()
+        }
+
+        dev.architectury.event.events.common.TickEvent.PLAYER_POST.register { player ->
+            if (player is ServerPlayer) {
+                val uuid = player.uuid
+                ElevatorTracker.tickCooldown(uuid)
+                val cooldown = ElevatorTracker.getCooldown(uuid)
+
+                val onGround = player.isOnGroundCompat()
+                val wasOnGround = ElevatorTracker.wasOnGround(uuid)
+
+                if (cooldown == 0) {
+                    val lvl = player.commandSenderWorld
+                    val below = player.blockPosition().below()
+                    val state = lvl.getBlockState(below)
+                    if (state.block is MEElevatorBlock) {
+                        if (player.isShiftKeyDown && onGround) {
+                            ElevatorTeleportHelper.tryTeleport(player, false)
+                        } else if (wasOnGround && !onGround && player.deltaMovement.y > 0.05 && player.fallDistance <= 0.1f) {
+                            ElevatorTeleportHelper.tryTeleport(player, true)
+                        }
+                    }
+                }
+                ElevatorTracker.setOnGround(uuid, onGround)
+            }
         }
 
         LOGGER.info("Applied Flooring Mod initialized successfully.")

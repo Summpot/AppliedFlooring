@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " E ",
+    "SFS",
+    " E "
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "S": {
+      "tag": "minecraft:stone_crafting_materials"
+    },
+    "F": {
+      "item": "appliedflooring:me_flooring"
+    }
+  },
+  "result": {
+    "item": "appliedflooring:me_elevator",
+    "count": 1
+  }
+}
