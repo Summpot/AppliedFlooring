@@ -2,18 +2,32 @@ package io.github.summpot.appliedflooring.client.render
 
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import com.mojang.math.Matrix3f
 import com.mojang.math.Matrix4f
 import com.mojang.math.Vector3f
 import io.github.summpot.appliedflooring.blockentity.MELaserConnectorBlockEntity
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.core.Direction
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.Mth
 
 class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context) : BlockEntityRenderer<MELaserConnectorBlockEntity> {
+
+    companion object {
+        private val LASER_CORE_TEXTURE = ResourceLocation("appliedflooring", "textures/misc/laser.png")
+        private val LASER_BEAM_TEXTURE = ResourceLocation("appliedflooring", "textures/misc/laser2.png")
+        private val LASER_GLOW_TEXTURE = ResourceLocation("appliedflooring", "textures/misc/laser_glow.png")
+    }
+
+    override fun shouldRenderOffScreen(be: MELaserConnectorBlockEntity): Boolean = true
+
+    override fun getViewDistance(): Int = 256
 
     override fun render(
         be: MELaserConnectorBlockEntity,
@@ -28,7 +42,7 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
         val targetUp = be.connectedTargetUp
         if (targetUp != null && be.isPowered()) {
             val height = (targetUp.y - be.blockPos.y).toFloat()
-            if (height > 0.0f) {
+            if (height > 1.0f) {
                 renderLaserBeam(be, partialTicks, poseStack, bufferSource, height)
             }
         }
@@ -47,68 +61,137 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
         val b = rgb.third
 
         val gameTime = be.level?.gameTime ?: 0L
-        val animAngle = ((gameTime % 360) + partialTicks) * 3.0f
+        val animTime = (gameTime % 72000L).toFloat() + partialTicks
 
-        poseStack.pushPose()
-        poseStack.translate(0.5, 0.0, 0.5)
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(animAngle))
-        poseStack.translate(-0.5, 0.0, -0.5)
+        val minY = 1.0f
+        val maxY = height
+        val length = maxY - minY
+        if (length <= 0.0f) return
 
-        val buffer = bufferSource.getBuffer(RenderType.lightning())
-        val mat = poseStack.last().pose()
+        val pose = poseStack.last().pose()
+        val normal = poseStack.last().normal()
 
-        // 1. Inner intense beam
-        renderBeamBox(mat, buffer, 0.06f, 1.0f, height, r, g, b, 0.9f)
+        // 1. Terminal Energy Disks (Emitter at y=1.002f and Receiver at y=maxY-0.002f)
+        val diskBuffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_GLOW_TEXTURE, true))
+        val diskRadius = 0.28f + Mth.sin(animTime * 0.12f) * 0.02f
+        val diskRot = animTime * 3.0f
+        val diskR = r * 0.5f + 0.5f
+        val diskG = g * 0.5f + 0.5f
+        val diskB = b * 0.5f + 0.5f
+        renderHorizontalDisk(pose, normal, diskBuffer, 1.002f, diskRadius, diskRot, diskR, diskG, diskB, 0.85f)
+        renderHorizontalDisk(pose, normal, diskBuffer, maxY - 0.002f, diskRadius, -diskRot, diskR, diskG, diskB, 0.85f)
 
-        // 2. Outer glow halo
-        renderBeamBox(mat, buffer, 0.14f, 1.0f, height, r, g, b, 0.35f)
+        // 2. Outer Glow Aura (Wide translucent field, slow reverse rotation)
+        val glowBuffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_GLOW_TEXTURE, true))
+        val glowRadius = 0.25f + Mth.sin(animTime * 0.06f) * 0.02f
+        val glowRot = -animTime * 1.5f
+        val vGlow1 = -animTime * 0.02f
+        val vGlow2 = vGlow1 + length * 0.5f
+        renderCrossedPlanes(pose, normal, glowBuffer, minY, maxY, glowRadius, glowRot, 2, r, g, b, 0.30f, vGlow1, vGlow2)
 
-        poseStack.popPose()
+        // 3. Main Plasma Stream (8-plane volumetric cylinder, medium speed forward rotation)
+        val beamBuffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_BEAM_TEXTURE, true))
+        val beamRadius = 0.12f + Mth.sin(animTime * 0.1f) * 0.01f
+        val beamRot = animTime * 2.0f
+        val vBeam1 = animTime * 0.04f
+        val vBeam2 = vBeam1 + length * 1.0f
+        renderCrossedPlanes(pose, normal, beamBuffer, minY, maxY, beamRadius, beamRot, 4, r, g, b, 0.75f, vBeam1, vBeam2)
+
+        // 4. Inner Intense Core (Bright white-hot core, fast rotation & fast upward particle flow)
+        val coreBuffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_CORE_TEXTURE, true))
+        val coreRadius = 0.055f + Mth.sin(animTime * 0.15f) * 0.005f
+        val coreRot = animTime * 4.0f
+        val vCore1 = -animTime * 0.08f
+        val vCore2 = vCore1 + length * 1.5f
+        val coreR = r * 0.4f + 0.6f
+        val coreG = g * 0.4f + 0.6f
+        val coreB = b * 0.4f + 0.6f
+        renderCrossedPlanes(pose, normal, coreBuffer, minY, maxY, coreRadius, coreRot, 2, coreR, coreG, coreB, 0.95f, vCore1, vCore2)
     }
 
-    private fun renderBeamBox(
+    private fun renderCrossedPlanes(
         mat: Matrix4f,
+        normalMat: Matrix3f,
         buffer: VertexConsumer,
-        radius: Float,
         minY: Float,
         maxY: Float,
+        radius: Float,
+        baseAngleDeg: Float,
+        planeCount: Int,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float,
+        v1: Float,
+        v2: Float
+    ) {
+        val angleStep = 180.0f / planeCount
+        for (i in 0 until planeCount) {
+            val angleDeg = baseAngleDeg + i * angleStep
+            val rad = Math.toRadians(angleDeg.toDouble())
+            val cos = (Math.cos(rad) * radius).toFloat()
+            val sin = (Math.sin(rad) * radius).toFloat()
+
+            val x1 = 0.5f - cos
+            val z1 = 0.5f - sin
+            val x2 = 0.5f + cos
+            val z2 = 0.5f + sin
+
+            // Face 1
+            addVertex(mat, normalMat, buffer, x1, minY, z1, r, g, b, a, 0.0f, v1)
+            addVertex(mat, normalMat, buffer, x1, maxY, z1, r, g, b, a, 0.0f, v2)
+            addVertex(mat, normalMat, buffer, x2, maxY, z2, r, g, b, a, 1.0f, v2)
+            addVertex(mat, normalMat, buffer, x2, minY, z2, r, g, b, a, 1.0f, v1)
+
+            // Face 2 (Reverse for two-sided visibility)
+            addVertex(mat, normalMat, buffer, x2, minY, z2, r, g, b, a, 1.0f, v1)
+            addVertex(mat, normalMat, buffer, x2, maxY, z2, r, g, b, a, 1.0f, v2)
+            addVertex(mat, normalMat, buffer, x1, maxY, z1, r, g, b, a, 0.0f, v2)
+            addVertex(mat, normalMat, buffer, x1, minY, z1, r, g, b, a, 0.0f, v1)
+        }
+    }
+
+    private fun renderHorizontalDisk(
+        mat: Matrix4f,
+        normalMat: Matrix3f,
+        buffer: VertexConsumer,
+        y: Float,
+        radius: Float,
+        rotDeg: Float,
         r: Float,
         g: Float,
         b: Float,
         a: Float
     ) {
-        val minX = 0.5f - radius
-        val maxX = 0.5f + radius
-        val minZ = 0.5f - radius
-        val maxZ = 0.5f + radius
+        val rad = Math.toRadians(rotDeg.toDouble())
+        val cos = (Math.cos(rad) * radius).toFloat()
+        val sin = (Math.sin(rad) * radius).toFloat()
 
-        // North
-        addVertex(mat, buffer, minX, minY, minZ, r, g, b, a)
-        addVertex(mat, buffer, minX, maxY, minZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, maxY, minZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, minY, minZ, r, g, b, a)
+        val x1 = 0.5f - cos + sin
+        val z1 = 0.5f - sin - cos
+        val x2 = 0.5f + cos + sin
+        val z2 = 0.5f + sin - cos
+        val x3 = 0.5f + cos - sin
+        val z3 = 0.5f + sin + cos
+        val x4 = 0.5f - cos - sin
+        val z4 = 0.5f - sin + cos
 
-        // South
-        addVertex(mat, buffer, maxX, minY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, maxY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, minX, maxY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, minX, minY, maxZ, r, g, b, a)
+        // Facing UP
+        addVertex(mat, normalMat, buffer, x1, y, z1, r, g, b, a, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x2, y, z2, r, g, b, a, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x3, y, z3, r, g, b, a, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x4, y, z4, r, g, b, a, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f)
 
-        // West
-        addVertex(mat, buffer, minX, minY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, minX, maxY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, minX, maxY, minZ, r, g, b, a)
-        addVertex(mat, buffer, minX, minY, minZ, r, g, b, a)
-
-        // East
-        addVertex(mat, buffer, maxX, minY, minZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, maxY, minZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, maxY, maxZ, r, g, b, a)
-        addVertex(mat, buffer, maxX, minY, maxZ, r, g, b, a)
+        // Facing DOWN
+        addVertex(mat, normalMat, buffer, x4, y, z4, r, g, b, a, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x3, y, z3, r, g, b, a, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x2, y, z2, r, g, b, a, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x1, y, z1, r, g, b, a, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f)
     }
 
     private fun addVertex(
         mat: Matrix4f,
+        normalMat: Matrix3f,
         buffer: VertexConsumer,
         x: Float,
         y: Float,
@@ -116,9 +199,19 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
         r: Float,
         g: Float,
         b: Float,
-        a: Float
+        a: Float,
+        u: Float,
+        v: Float,
+        nx: Float = 0.0f,
+        ny: Float = 1.0f,
+        nz: Float = 0.0f
     ) {
-        buffer.vertex(mat, x, y, z).color(r, g, b, a).endVertex()
+        buffer.vertex(mat, x, y, z)
+            .color(r, g, b, a)
+            .uv(u, v)
+            .uv2(LightTexture.FULL_BRIGHT)
+            .normal(normalMat, nx, ny, nz)
+            .endVertex()
     }
 
     private fun getLaserColor(color: appeng.api.util.AEColor): Triple<Float, Float, Float> {
@@ -138,8 +231,8 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
             appeng.api.util.AEColor.BROWN -> Triple(0.6f, 0.35f, 0.15f)
             appeng.api.util.AEColor.GREEN -> Triple(0.25f, 0.75f, 0.15f)
             appeng.api.util.AEColor.RED -> Triple(1.0f, 0.2f, 0.2f)
-            appeng.api.util.AEColor.BLACK -> Triple(0.2f, 0.2f, 0.25f)
-            appeng.api.util.AEColor.TRANSPARENT -> Triple(0.3f, 0.85f, 1.0f)
+            appeng.api.util.AEColor.BLACK -> Triple(0.25f, 0.25f, 0.3f)
+            appeng.api.util.AEColor.TRANSPARENT -> Triple(0.2f, 0.85f, 1.0f)
         }
     }
 
