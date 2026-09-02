@@ -94,7 +94,13 @@ open class MEFlooringBlockEntity(
     open fun onEntitySteppedOn(entity: Entity) {
     }
 
+    var clientPowered: Boolean = false
+
     fun isPowered(): Boolean {
+        val lvl = level
+        if (lvl != null && lvl.isClientSide) {
+            return clientPowered || (blockState.hasProperty(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) && blockState.getValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED))
+        }
         if (!mainNode.isReady) return false
         val grid = mainNode.grid ?: return false
         return grid.energyService?.isNetworkPowered ?: false
@@ -103,6 +109,13 @@ open class MEFlooringBlockEntity(
     open fun serverTick(level: Level, pos: BlockPos, state: BlockState) {
         tickCounter++
         if (tickCounter % 10 != 0) return
+
+        val currentPowered = isPowered()
+        if (state.hasProperty(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) &&
+            state.getValue(io.github.summpot.appliedflooring.block.MEFlooringBlock.POWERED) != currentPowered
+        ) {
+            markForUpdate()
+        }
 
         val grid = mainNode.grid ?: return
         val energyService = grid.energyService ?: return
@@ -489,6 +502,7 @@ open class MEFlooringBlockEntity(
         super.saveAdditional(tag, registries)
         mainNode.saveToNBT(tag)
         tag.putInt("AEColor", currentColor.ordinal)
+        tag.putBoolean("AFPowered", isPowered())
 
         val partsTag = CompoundTag()
         for (dir in Direction.values()) {
@@ -506,6 +520,9 @@ open class MEFlooringBlockEntity(
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
         mainNode.loadFromNBT(tag)
+        if (tag.contains("AFPowered")) {
+            clientPowered = tag.getBoolean("AFPowered")
+        }
         if (tag.contains("AEColor")) {
             val idx = tag.getInt("AEColor")
             if (idx in 0 until AEColor.values().size) {

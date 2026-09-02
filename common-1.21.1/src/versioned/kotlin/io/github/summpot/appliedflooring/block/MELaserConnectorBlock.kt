@@ -32,4 +32,68 @@ class MELaserConnectorBlock(
             }
         }
     }
+
+    override fun useWithoutItem(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: net.minecraft.world.entity.player.Player,
+        hit: net.minecraft.world.phys.BlockHitResult
+    ): net.minecraft.world.InteractionResult {
+        val be = level.getBlockEntity(pos)
+        if (be is io.github.summpot.appliedflooring.blockentity.MEFlooringBlockEntity) {
+            val selectedPart = be.selectPartWorld(hit.location)
+            if (selectedPart.part != null) {
+                val activated = selectedPart.part.onUseWithoutItem(player, hit.location)
+                if (activated) {
+                    return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide)
+                }
+            }
+        }
+
+        if (!level.isClientSide && player is net.minecraft.server.level.ServerPlayer) {
+            val connectorBe = be as? MELaserConnectorBlockEntity
+            if (connectorBe != null) {
+                dev.architectury.registry.menu.MenuRegistry.openExtendedMenu(player, connectorBe)
+            }
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide)
+    }
+
+    override fun useItemOn(
+        heldItem: net.minecraft.world.item.ItemStack,
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: net.minecraft.world.entity.player.Player,
+        hand: net.minecraft.world.InteractionHand,
+        hit: net.minecraft.world.phys.BlockHitResult
+    ): net.minecraft.world.ItemInteractionResult {
+        // 0. Wrench interaction
+        if (io.github.summpot.appliedflooring.util.FlooringWrenchHelper.isWrench(heldItem) && player.isShiftKeyDown) {
+            return super.useItemOn(heldItem, state, level, pos, player, hand, hit)
+        }
+
+        // 1. Part item
+        if (heldItem.item is appeng.api.parts.IPartItem<*>) {
+            return super.useItemOn(heldItem, state, level, pos, player, hand, hit)
+        }
+
+        val be = level.getBlockEntity(pos)
+        if (be is io.github.summpot.appliedflooring.blockentity.MEFlooringBlockEntity) {
+            val selectedPart = be.selectPartWorld(hit.location)
+            if (selectedPart.part != null) {
+                return super.useItemOn(heldItem, state, level, pos, player, hand, hit)
+            }
+        }
+
+        // 2. Open GUI
+        if (!level.isClientSide && player is net.minecraft.server.level.ServerPlayer) {
+            val connectorBe = be as? MELaserConnectorBlockEntity
+            if (connectorBe != null) {
+                dev.architectury.registry.menu.MenuRegistry.openExtendedMenu(player, connectorBe)
+            }
+        }
+        return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide)
+    }
 }

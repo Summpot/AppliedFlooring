@@ -24,12 +24,12 @@ object AppliedFlooringMod {
         ModItems.register()
         ModBlockEntities.register()
         ModCreativeTabs.register()
+        io.github.summpot.appliedflooring.registry.ModMenus.register()
+        io.github.summpot.appliedflooring.network.LaserConnectorNetwork.init()
 
         EnvExecutor.runInEnv(Env.CLIENT) {
             Runnable {
-                dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_SETUP.register {
-                    MEFlooringClient.init()
-                }
+                MEFlooringClient.init()
             }
         }
 

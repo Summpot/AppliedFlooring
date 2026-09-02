@@ -46,6 +46,10 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
                 renderLaserBeam(be, partialTicks, poseStack, bufferSource, height)
             }
         }
+
+        if (be.builderStatus == io.github.summpot.appliedflooring.blockentity.BuilderStatus.BUILDING) {
+            renderBuildingEffects(be, partialTicks, poseStack, bufferSource)
+        }
     }
 
     private fun renderLaserBeam(
@@ -366,5 +370,88 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
                 else -> localDir
             }
         }
+    }
+
+    private fun renderBuildingEffects(
+        be: MELaserConnectorBlockEntity,
+        partialTicks: Float,
+        poseStack: PoseStack,
+        bufferSource: MultiBufferSource
+    ) {
+        val targetY = if (be.connectedTargetUp != null) be.connectedTargetUp!!.y else be.blockPos.y + be.targetYOffset
+        val relY = (targetY - be.blockPos.y).toFloat()
+        val placingPos = be.currentPlacingPos
+
+        val rgb = getLaserColor(be.floorColor)
+        val r = rgb.first
+        val g = rgb.second
+        val b = rgb.third
+
+        // 1. Render beam pulse to currently placing block
+        if (placingPos != null) {
+            val dx = (placingPos.x - be.blockPos.x).toFloat()
+            val dz = (placingPos.z - be.blockPos.z).toFloat()
+
+            val startX = 0.5f
+            val startY = relY + 0.5f
+            val startZ = 0.5f
+
+            val endX = dx + 0.5f
+            val endY = relY + 0.5f
+            val endZ = dz + 0.5f
+
+            val buffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_CORE_TEXTURE, true))
+            val pose = poseStack.last().pose()
+            val normal = poseStack.last().normal()
+
+            val rad = 0.04f
+            addVertex(pose, normal, buffer, startX, startY, startZ, r, g, b, 0.9f, 0.0f, 0.0f)
+            addVertex(pose, normal, buffer, startX, startY + rad, startZ, r, g, b, 0.9f, 0.0f, 1.0f)
+            addVertex(pose, normal, buffer, endX, endY + rad, endZ, r, g, b, 0.9f, 1.0f, 1.0f)
+            addVertex(pose, normal, buffer, endX, endY, endZ, r, g, b, 0.9f, 1.0f, 0.0f)
+        }
+
+        // 2. Render holographic perimeter boundary at target floor layer
+        val rx = be.radiusX.toFloat()
+        val rz = be.radiusZ.toFloat()
+        val minX = -rx
+        val maxX = rx + 1.0f
+        val minZ = -rz
+        val maxZ = rz + 1.0f
+        val yBox = relY + 0.02f
+
+        val glowBuffer = bufferSource.getBuffer(RenderType.beaconBeam(LASER_GLOW_TEXTURE, true))
+        val pose = poseStack.last().pose()
+        val normal = poseStack.last().normal()
+        val lineW = 0.06f
+
+        // North edge
+        renderHoloEdge(pose, normal, glowBuffer, minX, maxX, minZ, minZ + lineW, yBox, r, g, b, 0.5f)
+        // South edge
+        renderHoloEdge(pose, normal, glowBuffer, minX, maxX, maxZ - lineW, maxZ, yBox, r, g, b, 0.5f)
+        // West edge
+        renderHoloEdge(pose, normal, glowBuffer, minX, minX + lineW, minZ, maxZ, yBox, r, g, b, 0.5f)
+        // East edge
+        renderHoloEdge(pose, normal, glowBuffer, maxX - lineW, maxX, minZ, maxZ, yBox, r, g, b, 0.5f)
+    }
+
+    private fun renderHoloEdge(
+        mat: Matrix4f,
+        normalMat: Matrix3f,
+        buffer: VertexConsumer,
+        x1: Float,
+        x2: Float,
+        z1: Float,
+        z2: Float,
+        y: Float,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float
+    ) {
+        addVertex(mat, normalMat, buffer, x1, y, z1, r, g, b, a, 0.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x2, y, z1, r, g, b, a, 1.0f, 0.0f)
+        addVertex(mat, normalMat, buffer, x2, y, z2, r, g, b, a, 1.0f, 1.0f)
+        addVertex(mat, normalMat, buffer, x1, y, z2, r, g, b, a, 0.0f, 1.0f)
     }
 }

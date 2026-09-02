@@ -32,4 +32,41 @@ class MELaserConnectorBlock(
             }
         }
     }
+
+    override fun use(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: net.minecraft.world.entity.player.Player,
+        hand: net.minecraft.world.InteractionHand,
+        hit: net.minecraft.world.phys.BlockHitResult
+    ): net.minecraft.world.InteractionResult {
+        val heldItem = player.getItemInHand(hand)
+
+        // 0. Wrench interaction
+        if (!heldItem.isEmpty && io.github.summpot.appliedflooring.util.FlooringWrenchHelper.isWrench(heldItem) && player.isShiftKeyDown) {
+            return super.use(state, level, pos, player, hand, hit)
+        }
+
+        // 1. Part item or clicked part interaction
+        val be = level.getBlockEntity(pos)
+        if (be is io.github.summpot.appliedflooring.blockentity.MEFlooringBlockEntity) {
+            if (!heldItem.isEmpty && heldItem.item is appeng.api.parts.IPartItem<*>) {
+                return super.use(state, level, pos, player, hand, hit)
+            }
+            val selectedPart = be.selectPartWorld(hit.location)
+            if (selectedPart.part != null) {
+                return super.use(state, level, pos, player, hand, hit)
+            }
+        }
+
+        // 2. Open laser connector terminal GUI
+        if (!level.isClientSide && player is net.minecraft.server.level.ServerPlayer) {
+            val connectorBe = be as? MELaserConnectorBlockEntity
+            if (connectorBe != null) {
+                dev.architectury.registry.menu.MenuRegistry.openExtendedMenu(player, connectorBe)
+            }
+        }
+        return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide)
+    }
 }

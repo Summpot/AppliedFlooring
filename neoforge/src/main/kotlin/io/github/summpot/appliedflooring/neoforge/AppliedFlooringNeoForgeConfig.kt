@@ -11,6 +11,11 @@ class AppliedFlooringNeoForgeConfig(builder: ModConfigSpec.Builder) {
     private val laserIdleBaseEnergy: ModConfigSpec.DoubleValue
     private val laserIdleDistanceEnergy: ModConfigSpec.DoubleValue
     private val laserMaxDistance: ModConfigSpec.IntValue
+    private val laserRemotePlaceEnergy: ModConfigSpec.DoubleValue
+    private val laserBuilderEnergyPerBlock: ModConfigSpec.DoubleValue
+    private val laserBuilderMaxRadius: ModConfigSpec.IntValue
+    private val laserBuilderTickInterval: ModConfigSpec.IntValue
+    private val laserBuilderBlocksPerTick: ModConfigSpec.IntValue
 
     init {
         builder.comment("ME Elevator Configuration").push("elevator")
@@ -38,6 +43,21 @@ class AppliedFlooringNeoForgeConfig(builder: ModConfigSpec.Builder) {
         laserMaxDistance = builder
             .comment("Maximum vertical distance in blocks to connect laser beams")
             .defineInRange("max_distance", 64, 4, 256)
+        laserRemotePlaceEnergy = builder
+            .comment("Energy cost (AE) to remotely place another layer's laser connector")
+            .defineInRange("remote_place_energy", 500.0, 0.0, 1000000.0)
+        laserBuilderEnergyPerBlock = builder
+            .comment("Energy cost (AE) consumed per floor block placed by auto-builder")
+            .defineInRange("builder_energy_per_block", 20.0, 0.0, 100000.0)
+        laserBuilderMaxRadius = builder
+            .comment("Maximum allowable radius for auto floor construction")
+            .defineInRange("builder_max_radius", 16, 1, 32)
+        laserBuilderTickInterval = builder
+            .comment("Tick interval between floor block placement steps")
+            .defineInRange("builder_tick_interval", 2, 1, 100)
+        laserBuilderBlocksPerTick = builder
+            .comment("Number of blocks placed per step")
+            .defineInRange("builder_blocks_per_tick", 1, 1, 16)
         builder.pop()
     }
 
@@ -49,7 +69,12 @@ class AppliedFlooringNeoForgeConfig(builder: ModConfigSpec.Builder) {
             elevatorAllowFallbackFlooring = elevatorAllowFallbackFlooring.get(),
             laserIdleBaseEnergy = laserIdleBaseEnergy.get(),
             laserIdleDistanceEnergy = laserIdleDistanceEnergy.get(),
-            laserMaxDistance = laserMaxDistance.get()
+            laserMaxDistance = laserMaxDistance.get(),
+            laserRemotePlaceEnergy = laserRemotePlaceEnergy.get(),
+            laserBuilderEnergyPerBlock = laserBuilderEnergyPerBlock.get(),
+            laserBuilderMaxRadius = laserBuilderMaxRadius.get(),
+            laserBuilderTickInterval = laserBuilderTickInterval.get(),
+            laserBuilderBlocksPerTick = laserBuilderBlocksPerTick.get()
         )
     }
 
