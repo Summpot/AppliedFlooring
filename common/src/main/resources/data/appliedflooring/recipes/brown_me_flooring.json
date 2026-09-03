@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "FFF",
-    "FDF",
-    "FFF"
+    "CCC",
+    "CXC",
+    "CCC"
   ],
   "key": {
-    "F": {
-      "item": "appliedflooring:me_flooring"
+    "C": {
+      "item": "minecraft:brown_concrete"
     },
-    "D": {
-      "tag": "c:dyes/brown"
+    "X": {
+      "tag": "c:glass_cables"
     }
   },
   "result": {

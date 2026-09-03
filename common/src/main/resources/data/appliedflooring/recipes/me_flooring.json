@@ -1,15 +1,23 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "SSS",
-    "SCS",
-    "SSS"
+    "CCC",
+    "CXC",
+    "CCC"
   ],
   "key": {
-    "S": {
-      "tag": "minecraft:stone_crafting_materials"
-    },
-    "C": {
+    "C": [
+      {
+        "item": "minecraft:light_gray_concrete"
+      },
+      {
+        "item": "minecraft:white_concrete"
+      },
+      {
+        "item": "minecraft:gray_concrete"
+      }
+    ],
+    "X": {
       "tag": "c:glass_cables"
     }
   },
