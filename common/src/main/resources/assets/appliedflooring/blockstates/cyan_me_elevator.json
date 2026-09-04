@@ -12,5 +12,13 @@
     "powered=true,waterlogged=true": {
       "model": "appliedflooring:block/cyan_me_elevator_online"
     }
+  },
+  "athena:loader": "athena:ctm",
+  "ctm_textures": {
+    "center": "appliedflooring:block/cyan_me_elevator_center",
+    "empty": "appliedflooring:block/cyan_me_elevator_empty",
+    "horizontal": "appliedflooring:block/cyan_me_elevator_h",
+    "vertical": "appliedflooring:block/cyan_me_elevator_v",
+    "particle": "appliedflooring:block/cyan_me_elevator"
   }
 }

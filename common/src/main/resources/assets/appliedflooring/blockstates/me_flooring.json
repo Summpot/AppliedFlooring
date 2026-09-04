@@ -12,5 +12,13 @@
     "powered=true,waterlogged=true": {
       "model": "appliedflooring:block/me_flooring_online"
     }
+  },
+  "athena:loader": "athena:ctm",
+  "ctm_textures": {
+    "center": "appliedflooring:block/me_flooring_center",
+    "empty": "appliedflooring:block/me_flooring_empty",
+    "horizontal": "appliedflooring:block/me_flooring_h",
+    "vertical": "appliedflooring:block/me_flooring_v",
+    "particle": "appliedflooring:block/me_flooring"
   }
 }

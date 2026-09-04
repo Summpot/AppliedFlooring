@@ -12,5 +12,13 @@
     "powered=true,waterlogged=true": {
       "model": "appliedflooring:block/gray_me_laser_connector_online"
     }
+  },
+  "athena:loader": "athena:ctm",
+  "ctm_textures": {
+    "center": "appliedflooring:block/gray_me_laser_connector_center",
+    "empty": "appliedflooring:block/gray_me_laser_connector_empty",
+    "horizontal": "appliedflooring:block/gray_me_laser_connector_h",
+    "vertical": "appliedflooring:block/gray_me_laser_connector_v",
+    "particle": "appliedflooring:block/gray_me_laser_connector"
   }
 }

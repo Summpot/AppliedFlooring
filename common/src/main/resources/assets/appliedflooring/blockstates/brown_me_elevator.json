@@ -12,5 +12,13 @@
     "powered=true,waterlogged=true": {
       "model": "appliedflooring:block/brown_me_elevator_online"
     }
+  },
+  "athena:loader": "athena:ctm",
+  "ctm_textures": {
+    "center": "appliedflooring:block/brown_me_elevator_center",
+    "empty": "appliedflooring:block/brown_me_elevator_empty",
+    "horizontal": "appliedflooring:block/brown_me_elevator_h",
+    "vertical": "appliedflooring:block/brown_me_elevator_v",
+    "particle": "appliedflooring:block/brown_me_elevator"
   }
 }
