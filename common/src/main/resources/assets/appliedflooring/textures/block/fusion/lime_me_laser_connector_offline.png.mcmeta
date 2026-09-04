@@ -3,7 +3,12 @@
     "type": "connecting",
     "layout": "pieced",
     "connections": {
-      "type": "is_same_block"
+      "type": "match_block",
+      "blocks": [
+        "appliedflooring:lime_me_flooring",
+        "appliedflooring:lime_me_elevator",
+        "appliedflooring:lime_me_laser_connector"
+      ]
     }
   }
 }

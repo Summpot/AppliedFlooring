@@ -20,5 +20,22 @@
     "horizontal": "appliedflooring:block/me_flooring_h",
     "vertical": "appliedflooring:block/me_flooring_v",
     "particle": "appliedflooring:block/me_flooring"
+  },
+  "connect_to": {
+    "type": "or",
+    "conditions": [
+      {
+        "type": "state",
+        "block": "appliedflooring:me_flooring"
+      },
+      {
+        "type": "state",
+        "block": "appliedflooring:me_elevator"
+      },
+      {
+        "type": "state",
+        "block": "appliedflooring:me_laser_connector"
+      }
+    ]
   }
 }
