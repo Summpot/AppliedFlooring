@@ -14,6 +14,9 @@ import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import org.joml.Matrix3f
 import org.joml.Matrix4f
 
@@ -23,11 +26,43 @@ class MELaserConnectorRenderer(val context: BlockEntityRendererProvider.Context)
         private val LASER_CORE_TEXTURE = ResourceLocation.tryParse("appliedflooring:textures/misc/laser.png")!!
         private val LASER_BEAM_TEXTURE = ResourceLocation.tryParse("appliedflooring:textures/misc/laser2.png")!!
         private val LASER_GLOW_TEXTURE = ResourceLocation.tryParse("appliedflooring:textures/misc/laser_glow.png")!!
+        private val INFINITE_AABB = AABB(
+            Double.NEGATIVE_INFINITY,
+            Double.NEGATIVE_INFINITY,
+            Double.NEGATIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY
+        )
     }
 
     override fun shouldRenderOffScreen(be: MELaserConnectorBlockEntity): Boolean = true
 
     override fun getViewDistance(): Int = 256
+
+    override fun shouldRender(be: MELaserConnectorBlockEntity, cameraPos: Vec3): Boolean {
+        val targetUp = be.connectedTargetUp
+        if (targetUp != null) {
+            val center = Vec3.atCenterOf(be.blockPos)
+            val dx = center.x - cameraPos.x
+            val dz = center.z - cameraPos.z
+            val horizDistSq = dx * dx + dz * dz
+            val maxDist = getViewDistance().toDouble()
+            if (horizDistSq > maxDist * maxDist) return false
+            val minY = be.blockPos.y.toDouble()
+            val maxY = targetUp.y.toDouble() + 1.0
+            return cameraPos.y >= minY - maxDist && cameraPos.y <= maxY + maxDist
+        }
+        return super.shouldRender(be, cameraPos)
+    }
+
+    fun getRenderBoundingBox(be: BlockEntity): AABB {
+        return INFINITE_AABB
+    }
+
+    fun getRenderBoundingBox(be: MELaserConnectorBlockEntity): AABB {
+        return INFINITE_AABB
+    }
 
     override fun render(
         be: MELaserConnectorBlockEntity,

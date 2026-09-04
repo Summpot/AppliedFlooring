@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.Level
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
@@ -529,5 +530,20 @@ class MELaserConnectorBlockEntity(
             totalBlocksCount = builderTag.getInt("TotalBlocks")
             placedBlocksCount = builderTag.getInt("PlacedBlocks")
         }
+    }
+
+    companion object {
+        val INFINITE_AABB = AABB(
+            Double.NEGATIVE_INFINITY,
+            Double.NEGATIVE_INFINITY,
+            Double.NEGATIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            Double.POSITIVE_INFINITY
+        )
+    }
+
+    fun getRenderBoundingBox(): AABB {
+        return INFINITE_AABB
     }
 }
