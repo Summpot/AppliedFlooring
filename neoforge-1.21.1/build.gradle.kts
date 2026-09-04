@@ -51,6 +51,9 @@ dependencies {
     if (project.findProperty("runtime_athena") == "true") {
         modLocalRuntime("maven.modrinth:athena-ctm:${project.findProperty("athena_neoforge_1_21_1_version")}")
     }
+    if (project.findProperty("runtime_fusion") == "true") {
+        modLocalRuntime("maven.modrinth:fusion-connected-textures:${project.findProperty("fusion_neoforge_1_21_1_version")}")
+    }
 
     common(project(path = ":common-1.21.1", configuration = "namedElements")) {
         isTransitive = false

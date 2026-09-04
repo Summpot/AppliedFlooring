@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "appliedflooring:block/fusion/brown_me_elevator_offline"
+  }
+}

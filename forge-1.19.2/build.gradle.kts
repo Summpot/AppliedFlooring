@@ -53,6 +53,10 @@ dependencies {
 
     modImplementation("appeng:appliedenergistics2-forge:$ae2Version")
 
+    if (project.findProperty("runtime_fusion") == "true") {
+        modLocalRuntime("maven.modrinth:fusion-connected-textures:${project.findProperty("fusion_forge_1_19_2_version")}")
+    }
+
     common(project(path = ":common-1.19.2", configuration = "namedElements")) {
         isTransitive = false
     }

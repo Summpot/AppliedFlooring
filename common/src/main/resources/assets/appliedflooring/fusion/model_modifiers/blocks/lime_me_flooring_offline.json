@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:lime_me_flooring",
+      "properties": {
+        "powered": [
+          "false"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/lime_me_flooring_offline"
+  ]
+}
