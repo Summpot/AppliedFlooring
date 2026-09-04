@@ -1,16 +1,416 @@
 {
-  "variants": {
-    "powered=false,waterlogged=false": {
-      "model": "appliedflooring:block/green_me_elevator_offline"
+  "multipart": [
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": false,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_single_offline"
+      }
     },
-    "powered=false,waterlogged=true": {
-      "model": "appliedflooring:block/green_me_elevator_offline"
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": false,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_offline",
+        "y": 0
+      }
     },
-    "powered=true,waterlogged=false": {
-      "model": "appliedflooring:block/green_me_elevator_online"
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": false,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_offline",
+        "y": 90
+      }
     },
-    "powered=true,waterlogged=true": {
-      "model": "appliedflooring:block/green_me_elevator_online"
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": true,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_offline",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": false,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_offline",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": true,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_straight_offline",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": false,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_straight_offline",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": false,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_offline",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": true,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_offline",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": true,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_offline",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": false,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_offline",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": false,
+        "south": true,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_offline",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": true,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_offline",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": false,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_offline",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": true,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_offline",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": false,
+        "north": true,
+        "south": true,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_center_offline"
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": false,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_single_online"
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": false,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_online",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": false,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_online",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": true,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_online",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": false,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_end_online",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": true,
+        "east": false,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_straight_online",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": false,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_straight_online",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": false,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_online",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": true,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_online",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": true,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_online",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": false,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_corner_online",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": false,
+        "south": true,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_online",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": true,
+        "east": false,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_online",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": false,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_online",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": true,
+        "east": true,
+        "west": false
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_edge_online",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": true,
+        "north": true,
+        "south": true,
+        "east": true,
+        "west": true
+      },
+      "apply": {
+        "model": "appliedflooring:block/green_me_elevator_center_online"
+      }
     }
-  }
+  ]
 }
