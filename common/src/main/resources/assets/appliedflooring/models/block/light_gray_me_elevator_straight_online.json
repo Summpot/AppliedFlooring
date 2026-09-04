@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "appliedflooring:block/light_gray_me_elevator_straight"
-  }
-}

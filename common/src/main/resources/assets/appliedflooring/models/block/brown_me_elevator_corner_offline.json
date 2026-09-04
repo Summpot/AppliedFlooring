@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "appliedflooring:block/brown_me_elevator_corner_offline"
-  }
-}

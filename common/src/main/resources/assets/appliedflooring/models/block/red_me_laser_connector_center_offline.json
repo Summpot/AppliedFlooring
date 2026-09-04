@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "appliedflooring:block/red_me_laser_connector_center_offline"
-  }
-}
