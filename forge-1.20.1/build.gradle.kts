@@ -52,6 +52,9 @@ dependencies {
     modImplementation("dev.architectury:architectury-forge:$architecturyVersion")
 
     modImplementation("appeng:appliedenergistics2-forge:$ae2Version")
+    if (project.findProperty("runtime_athena") == "true") {
+        modLocalRuntime("maven.modrinth:athena-ctm:${project.findProperty("athena_forge_1_20_1_version")}")
+    }
 
     common(project(path = ":common-1.20.1", configuration = "namedElements")) {
         isTransitive = false

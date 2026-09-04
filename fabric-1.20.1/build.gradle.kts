@@ -44,6 +44,10 @@ dependencies {
     modImplementation("appeng:appliedenergistics2-fabric:$ae2Version")
     modApi("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.2")
 
+    if (project.findProperty("runtime_athena") == "true") {
+        modLocalRuntime("maven.modrinth:athena-ctm:${project.findProperty("athena_fabric_1_20_1_version")}")
+    }
+
     common(project(path = ":common-1.20.1", configuration = "namedElements")) {
         isTransitive = false
     }

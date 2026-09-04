@@ -100,6 +100,13 @@ subprojects {
             name = "Fuzs Mod Resources"
             url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/")
         }
+        maven {
+            name = "Modrinth"
+            url = uri("https://api.modrinth.com/maven")
+            content {
+                includeGroup("maven.modrinth")
+            }
+        }
     }
 
     configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
