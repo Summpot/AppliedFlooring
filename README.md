@@ -26,6 +26,19 @@ A Minecraft mod that adds cheap, functional ME flooring blocks to **Applied Ener
   - **1.21.1**: NeoForge
   - **1.19.2**: Fabric & Forge
 
+## Connected Textures (CTM) & Texture Generation
+
+This mod supports connected textures via both **Athena** and **Fusion**:
+- Athena CTM BlockStates: [`common/src/main/resources/assets/appliedflooring/blockstates/`](file:///common/src/main/resources/assets/appliedflooring/blockstates/)
+- Fusion Model Modifiers: [`common/src/main/resources/assets/appliedflooring/fusion/`](file:///common/src/main/resources/assets/appliedflooring/fusion/)
+
+Whenever base textures are modified, companion slices and pieced textures can be automatically generated using:
+```bash
+python tools/textures/generate_ctm_textures.py
+```
+For full architectural details, pixel layout rules, mathematical torus Laplace interpolation, and parameter adjustment guidelines, see:
+📖 **[CTM Texture Design & Generation Guide](file:///tools/textures/README.md)**
+
 ## Building
 
 ```bash
@@ -35,3 +48,4 @@ A Minecraft mod that adds cheap, functional ME flooring blocks to **Applied Ener
 # Build Forge 1.20.1
 ./gradlew :forge-1.20.1:build
 ```
+
