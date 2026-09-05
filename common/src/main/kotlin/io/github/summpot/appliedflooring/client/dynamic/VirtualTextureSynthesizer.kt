@@ -59,19 +59,31 @@ object VirtualTextureSynthesizer {
     }
 
     private fun synthesizeAll() {
+        val fOnMaster = toIntMatrix(loadMasterImage("me_flooring.png"))
+        val eOnMaster = toIntMatrix(loadMasterImage("me_elevator.png"))
+        val lOnMaster = toIntMatrix(loadMasterImage("me_laser_connector.png"))
+
+        val fOffMaster = deriveFlooringOffline(fOnMaster)
+        val eOffMaster = deriveElevatorOffline(eOnMaster, fOnMaster, fOffMaster)
+        val lOffMaster = deriveLaserOffline(lOnMaster, fOnMaster, fOffMaster)
+
+        // Register the uncolored textures in memory
+        RESOURCES["textures/block/me_flooring.png"] = toPngBytes(fOnMaster)
+        RESOURCES["textures/block/me_elevator.png"] = toPngBytes(eOnMaster)
+        RESOURCES["textures/block/me_laser_connector.png"] = toPngBytes(lOnMaster)
+        RESOURCES["textures/block/me_flooring_offline.png"] = toPngBytes(fOffMaster)
+        RESOURCES["textures/block/me_elevator_offline.png"] = toPngBytes(eOffMaster)
+        RESOURCES["textures/block/me_laser_connector_offline.png"] = toPngBytes(lOffMaster)
+
         val states = listOf(
             "" to "online",
             "_offline" to "offline"
         )
 
         for ((suffix, stateName) in states) {
-            val fMasterImg = loadMasterImage("me_flooring$suffix.png")
-            val eMasterImg = loadMasterImage("me_elevator$suffix.png")
-            val lMasterImg = loadMasterImage("me_laser_connector$suffix.png")
-
-            val fMaster = toIntMatrix(fMasterImg)
-            val eMaster = toIntMatrix(eMasterImg)
-            val lMaster = toIntMatrix(lMasterImg)
+            val fMaster = if (suffix.isEmpty()) fOnMaster else fOffMaster
+            val eMaster = if (suffix.isEmpty()) eOnMaster else eOffMaster
+            val lMaster = if (suffix.isEmpty()) lOnMaster else lOffMaster
 
             // Extract elevator and laser center icon masks (inside 3..12)
             val eIconMask = Array(16) { BooleanArray(16) }
@@ -180,6 +192,82 @@ object VirtualTextureSynthesizer {
         val baos = ByteArrayOutputStream()
         ImageIO.write(img, "PNG", baos)
         return baos.toByteArray()
+    }
+
+    private fun deriveFlooringOffline(fOn: Array<IntArray>): Array<IntArray> {
+        val out = Array(16) { IntArray(16) }
+        for (y in 0 until 16) {
+            for (x in 0 until 16) {
+                val argb = fOn[y][x]
+                val a = (argb ushr 24) and 0xFF
+                val r = (argb ushr 16) and 0xFF
+                val g = (argb ushr 8) and 0xFF
+                val b = argb and 0xFF
+                val d = if (y in 7..8 && x in 7..8) 21 else 14
+                val nr = (r - d).coerceIn(0, 255)
+                val ng = (g - d).coerceIn(0, 255)
+                val nb = (b - d).coerceIn(0, 255)
+                out[y][x] = (a shl 24) or (nr shl 16) or (ng shl 8) or nb
+            }
+        }
+        return out
+    }
+
+    private fun deriveElevatorOffline(
+        eOn: Array<IntArray>,
+        fOn: Array<IntArray>,
+        fOff: Array<IntArray>
+    ): Array<IntArray> {
+        val out = Array(16) { IntArray(16) }
+        for (y in 0 until 16) {
+            for (x in 0 until 16) {
+                if (eOn[y][x] == fOn[y][x]) {
+                    out[y][x] = fOff[y][x]
+                } else {
+                    val argb = eOn[y][x]
+                    val a = (argb ushr 24) and 0xFF
+                    val r = (argb ushr 16) and 0xFF
+                    val g = (argb ushr 8) and 0xFF
+                    val b = argb and 0xFF
+                    val (nr, ng, nb) = when {
+                        r == 80 && g == 230 && b == 255 -> Triple(60, 70, 85)
+                        r == 220 && g == 250 && b == 255 -> Triple(45, 55, 68)
+                        else -> Triple(r, g, b)
+                    }
+                    out[y][x] = (a shl 24) or (nr shl 16) or (ng shl 8) or nb
+                }
+            }
+        }
+        return out
+    }
+
+    private fun deriveLaserOffline(
+        lOn: Array<IntArray>,
+        fOn: Array<IntArray>,
+        fOff: Array<IntArray>
+    ): Array<IntArray> {
+        val out = Array(16) { IntArray(16) }
+        for (y in 0 until 16) {
+            for (x in 0 until 16) {
+                if (lOn[y][x] == fOn[y][x]) {
+                    out[y][x] = fOff[y][x]
+                } else {
+                    val argb = lOn[y][x]
+                    val a = (argb ushr 24) and 0xFF
+                    val r = (argb ushr 16) and 0xFF
+                    val g = (argb ushr 8) and 0xFF
+                    val b = argb and 0xFF
+                    val (nr, ng, nb) = when {
+                        r == 0 && g == 160 && b == 220 -> Triple(20, 28, 36)
+                        r == 90 && g == 230 && b == 255 -> Triple(30, 42, 54)
+                        r == 245 && g == 255 && b == 255 -> Triple(40, 55, 70)
+                        else -> Triple(r, g, b)
+                    }
+                    out[y][x] = (a shl 24) or (nr shl 16) or (ng shl 8) or nb
+                }
+            }
+        }
+        return out
     }
 
     private fun overlayIcon(
