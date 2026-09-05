@@ -15,7 +15,14 @@ class AppliedFlooringForge {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, AppliedFlooringForgeConfig.SPEC)
         MOD_BUS.addListener(::onConfigLoading)
         MOD_BUS.addListener(::onConfigReloading)
+        MOD_BUS.addListener(::onAddPackFinders)
         AppliedFlooringMod.init()
+    }
+
+    private fun onAddPackFinders(event: net.minecraftforge.event.AddPackFindersEvent) {
+        if (event.packType == net.minecraft.server.packs.PackType.CLIENT_RESOURCES) {
+            event.addRepositorySource(io.github.summpot.appliedflooring.client.dynamic.AppliedFlooringPackSource)
+        }
     }
 
     private fun onConfigLoading(event: ModConfigEvent.Loading) {

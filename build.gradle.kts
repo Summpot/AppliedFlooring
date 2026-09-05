@@ -151,10 +151,3 @@ subprojects {
 
     project.file(".gradle/.architectury-transformer").mkdirs()
 }
-
-tasks.register<Exec>("generateTextures") {
-    group = "appliedflooring"
-    description = "Generates all color variants, Athena CTM slices, and Fusion textures from master base textures"
-    commandLine("python", "tools/textures/generate_ctm_textures.py")
-}
-

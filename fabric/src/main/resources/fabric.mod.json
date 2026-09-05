@@ -17,6 +17,9 @@
       "io.github.summpot.appliedflooring.fabric.AppliedFlooringFabric"
     ]
   },
+  "mixins": [
+    "appliedflooring.fabric.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-language-kotlin": "*",
