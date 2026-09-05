@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:pink_me_elevator",
+      "properties": {
+        "powered": [
+          "true"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/pink_me_elevator_online"
+  ]
+}

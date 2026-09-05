@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "appliedflooring:block/magenta_me_flooring_offline"
+  }
+}

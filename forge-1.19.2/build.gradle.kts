@@ -80,7 +80,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 sourceSets {
     named("main") {
-        java.setSrcDirs(listOf(rootProject.file("forge/src/main/java"), project.file("src/versioned/java")))
+        java.setSrcDirs(listOf(rootProject.file("forge/src/main/java")))
         resources.setSrcDirs(listOf(rootProject.file("forge/src/main/resources")))
     }
 }
@@ -88,7 +88,7 @@ sourceSets {
 kotlin {
     sourceSets {
         named("main") {
-            kotlin.setSrcDirs(listOf(rootProject.file("forge/src/main/kotlin"), project.file("src/versioned/kotlin")))
+            kotlin.setSrcDirs(listOf(rootProject.file("forge/src/main/kotlin")))
         }
     }
 }

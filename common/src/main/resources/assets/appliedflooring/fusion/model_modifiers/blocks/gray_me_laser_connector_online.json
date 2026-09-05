@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:gray_me_laser_connector",
+      "properties": {
+        "powered": [
+          "true"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/gray_me_laser_connector_online"
+  ]
+}

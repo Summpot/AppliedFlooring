@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:light_gray_me_flooring",
+      "properties": {
+        "powered": [
+          "true"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/light_gray_me_flooring_online"
+  ]
+}

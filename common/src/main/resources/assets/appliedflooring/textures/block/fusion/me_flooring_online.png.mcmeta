@@ -1,0 +1,14 @@
+{
+  "fusion": {
+    "type": "connecting",
+    "layout": "pieced",
+    "connections": {
+      "type": "match_block",
+      "blocks": [
+        "appliedflooring:me_flooring",
+        "appliedflooring:me_elevator",
+        "appliedflooring:me_laser_connector"
+      ]
+    }
+  }
+}

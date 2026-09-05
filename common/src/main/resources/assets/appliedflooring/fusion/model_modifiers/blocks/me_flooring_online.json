@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:me_flooring",
+      "properties": {
+        "powered": [
+          "true"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/me_flooring_online"
+  ]
+}

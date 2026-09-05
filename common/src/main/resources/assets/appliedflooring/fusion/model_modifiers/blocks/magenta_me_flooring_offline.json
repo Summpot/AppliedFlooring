@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:magenta_me_flooring",
+      "properties": {
+        "powered": [
+          "false"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/magenta_me_flooring_offline"
+  ]
+}

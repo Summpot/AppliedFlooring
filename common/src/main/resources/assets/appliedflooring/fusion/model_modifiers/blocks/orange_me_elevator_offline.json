@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:orange_me_elevator",
+      "properties": {
+        "powered": [
+          "false"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/orange_me_elevator_offline"
+  ]
+}

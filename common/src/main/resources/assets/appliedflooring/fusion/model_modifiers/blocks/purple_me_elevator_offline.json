@@ -1,0 +1,15 @@
+{
+  "targets": [
+    {
+      "block": "appliedflooring:purple_me_elevator",
+      "properties": {
+        "powered": [
+          "false"
+        ]
+      }
+    }
+  ],
+  "default_model_overrides": [
+    "appliedflooring:block/fusion/purple_me_elevator_offline"
+  ]
+}

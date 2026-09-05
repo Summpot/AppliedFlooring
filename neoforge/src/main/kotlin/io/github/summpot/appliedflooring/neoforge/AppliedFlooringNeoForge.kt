@@ -18,11 +18,6 @@ class AppliedFlooringNeoForge(bus: IEventBus, container: ModContainer) {
         bus.addListener(this::onConfigReloading)
         AppliedFlooringMod.init()
         bus.addListener(::registerCapabilities)
-        dev.architectury.utils.EnvExecutor.runInEnv(dev.architectury.utils.Env.CLIENT) {
-            Runnable {
-                io.github.summpot.appliedflooring.neoforge.client.MEFlooringNeoForgeClient.register(bus)
-            }
-        }
     }
 
     private fun onConfigLoading(event: ModConfigEvent.Loading) {

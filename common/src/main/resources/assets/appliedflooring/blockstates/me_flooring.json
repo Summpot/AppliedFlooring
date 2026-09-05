@@ -12,5 +12,30 @@
     "powered=true,waterlogged=true": {
       "model": "appliedflooring:block/me_flooring_online"
     }
+  },
+  "athena:loader": "athena:ctm",
+  "ctm_textures": {
+    "center": "appliedflooring:block/me_flooring_center",
+    "empty": "appliedflooring:block/me_flooring_empty",
+    "horizontal": "appliedflooring:block/me_flooring_h",
+    "vertical": "appliedflooring:block/me_flooring_v",
+    "particle": "appliedflooring:block/me_flooring"
+  },
+  "connect_to": {
+    "type": "or",
+    "conditions": [
+      {
+        "type": "state",
+        "block": "appliedflooring:me_flooring"
+      },
+      {
+        "type": "state",
+        "block": "appliedflooring:me_elevator"
+      },
+      {
+        "type": "state",
+        "block": "appliedflooring:me_laser_connector"
+      }
+    ]
   }
 }

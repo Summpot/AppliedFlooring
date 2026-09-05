@@ -13,11 +13,6 @@ class AppliedFlooringFabric : ModInitializer {
             AppliedFlooringFabricConfig.SPEC
         )
         AppliedFlooringFabricConfig.applyToCommon()
-        dev.architectury.utils.EnvExecutor.runInEnv(dev.architectury.utils.Env.CLIENT) {
-            Runnable {
-                io.github.summpot.appliedflooring.fabric.client.MEFlooringFabricClient.init()
-            }
-        }
         AppliedFlooringMod.init()
     }
 }
