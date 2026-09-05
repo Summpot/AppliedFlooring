@@ -1,41 +1,16 @@
 {
   "variants": {
     "powered=false,waterlogged=false": {
-      "model": "appliedflooring:block/brown_me_elevator_offline"
+      "model": "appliedflooring:block/me_elevator_offline"
     },
     "powered=false,waterlogged=true": {
-      "model": "appliedflooring:block/brown_me_elevator_offline"
+      "model": "appliedflooring:block/me_elevator_offline"
     },
     "powered=true,waterlogged=false": {
-      "model": "appliedflooring:block/brown_me_elevator_online"
+      "model": "appliedflooring:block/me_elevator_online"
     },
     "powered=true,waterlogged=true": {
-      "model": "appliedflooring:block/brown_me_elevator_online"
+      "model": "appliedflooring:block/me_elevator_online"
     }
-  },
-  "athena:loader": "athena:ctm",
-  "ctm_textures": {
-    "center": "appliedflooring:block/brown_me_elevator_center",
-    "empty": "appliedflooring:block/brown_me_elevator_empty",
-    "horizontal": "appliedflooring:block/brown_me_elevator_h",
-    "vertical": "appliedflooring:block/brown_me_elevator_v",
-    "particle": "appliedflooring:block/brown_me_elevator"
-  },
-  "connect_to": {
-    "type": "or",
-    "conditions": [
-      {
-        "type": "state",
-        "block": "appliedflooring:brown_me_flooring"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:brown_me_elevator"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:brown_me_laser_connector"
-      }
-    ]
   }
 }

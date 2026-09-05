@@ -1,41 +1,16 @@
 {
   "variants": {
     "powered=false,waterlogged=false": {
-      "model": "appliedflooring:block/pink_me_flooring_offline"
+      "model": "appliedflooring:block/me_flooring_offline"
     },
     "powered=false,waterlogged=true": {
-      "model": "appliedflooring:block/pink_me_flooring_offline"
+      "model": "appliedflooring:block/me_flooring_offline"
     },
     "powered=true,waterlogged=false": {
-      "model": "appliedflooring:block/pink_me_flooring_online"
+      "model": "appliedflooring:block/me_flooring_online"
     },
     "powered=true,waterlogged=true": {
-      "model": "appliedflooring:block/pink_me_flooring_online"
+      "model": "appliedflooring:block/me_flooring_online"
     }
-  },
-  "athena:loader": "athena:ctm",
-  "ctm_textures": {
-    "center": "appliedflooring:block/pink_me_flooring_center",
-    "empty": "appliedflooring:block/pink_me_flooring_empty",
-    "horizontal": "appliedflooring:block/pink_me_flooring_h",
-    "vertical": "appliedflooring:block/pink_me_flooring_v",
-    "particle": "appliedflooring:block/pink_me_flooring"
-  },
-  "connect_to": {
-    "type": "or",
-    "conditions": [
-      {
-        "type": "state",
-        "block": "appliedflooring:pink_me_flooring"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:pink_me_elevator"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:pink_me_laser_connector"
-      }
-    ]
   }
 }

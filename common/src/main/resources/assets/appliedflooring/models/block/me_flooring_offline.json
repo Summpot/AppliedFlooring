@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "appliedflooring:block/tinted_cube_all",
   "textures": {
     "all": "appliedflooring:block/me_flooring_offline"
   }

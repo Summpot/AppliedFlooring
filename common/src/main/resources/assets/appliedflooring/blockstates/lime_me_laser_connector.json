@@ -1,41 +1,16 @@
 {
   "variants": {
     "powered=false,waterlogged=false": {
-      "model": "appliedflooring:block/lime_me_laser_connector_offline"
+      "model": "appliedflooring:block/me_laser_connector_offline"
     },
     "powered=false,waterlogged=true": {
-      "model": "appliedflooring:block/lime_me_laser_connector_offline"
+      "model": "appliedflooring:block/me_laser_connector_offline"
     },
     "powered=true,waterlogged=false": {
-      "model": "appliedflooring:block/lime_me_laser_connector_online"
+      "model": "appliedflooring:block/me_laser_connector_online"
     },
     "powered=true,waterlogged=true": {
-      "model": "appliedflooring:block/lime_me_laser_connector_online"
+      "model": "appliedflooring:block/me_laser_connector_online"
     }
-  },
-  "athena:loader": "athena:ctm",
-  "ctm_textures": {
-    "center": "appliedflooring:block/lime_me_laser_connector_center",
-    "empty": "appliedflooring:block/lime_me_laser_connector_empty",
-    "horizontal": "appliedflooring:block/lime_me_laser_connector_h",
-    "vertical": "appliedflooring:block/lime_me_laser_connector_v",
-    "particle": "appliedflooring:block/lime_me_laser_connector"
-  },
-  "connect_to": {
-    "type": "or",
-    "conditions": [
-      {
-        "type": "state",
-        "block": "appliedflooring:lime_me_flooring"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:lime_me_elevator"
-      },
-      {
-        "type": "state",
-        "block": "appliedflooring:lime_me_laser_connector"
-      }
-    ]
   }
 }

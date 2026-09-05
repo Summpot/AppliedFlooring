@@ -15,6 +15,11 @@ class AppliedFlooringForge {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, AppliedFlooringForgeConfig.SPEC)
         MOD_BUS.addListener(::onConfigLoading)
         MOD_BUS.addListener(::onConfigReloading)
+        dev.architectury.utils.EnvExecutor.runInEnv(dev.architectury.utils.Env.CLIENT) {
+            Runnable {
+                io.github.summpot.appliedflooring.forge.client.MEFlooringForgeClient.register(MOD_BUS)
+            }
+        }
         AppliedFlooringMod.init()
     }
 

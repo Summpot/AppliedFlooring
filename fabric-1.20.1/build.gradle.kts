@@ -59,7 +59,7 @@ dependencies {
 
 sourceSets {
     named("main") {
-        java.setSrcDirs(listOf(rootProject.file("fabric/src/main/java")))
+        java.setSrcDirs(listOf(rootProject.file("fabric/src/main/java"), project.file("src/versioned/java")))
         resources.setSrcDirs(listOf(rootProject.file("fabric/src/main/resources")))
     }
 }
@@ -67,7 +67,7 @@ sourceSets {
 kotlin {
     sourceSets {
         named("main") {
-            kotlin.setSrcDirs(listOf(rootProject.file("fabric/src/main/kotlin")))
+            kotlin.setSrcDirs(listOf(rootProject.file("fabric/src/main/kotlin"), project.file("src/versioned/kotlin")))
         }
     }
 }
