@@ -6,6 +6,7 @@ import io.github.summpot.appliedflooring.AppliedFlooringMod
 import io.github.summpot.appliedflooring.blockentity.FloorShape
 import io.github.summpot.appliedflooring.blockentity.MELaserConnectorBlockEntity
 import io.github.summpot.appliedflooring.blockentity.ReplaceMode
+import io.github.summpot.appliedflooring.util.LaserColumn
 import io.netty.buffer.Unpooled
 import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
@@ -36,6 +37,7 @@ object LaserConnectorNetwork {
             context.queue {
                 val player = context.player as? ServerPlayer ?: return@queue
                 val level = player.serverLevel()
+                if (!LaserColumn.playerCanAccess(player, pos)) return@queue
                 val be = level.getBlockEntity(pos) as? MELaserConnectorBlockEntity ?: return@queue
 
                 when (actionType) {

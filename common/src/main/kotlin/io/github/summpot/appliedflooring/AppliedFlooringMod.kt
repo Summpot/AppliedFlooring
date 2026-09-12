@@ -26,6 +26,7 @@ object AppliedFlooringMod {
         ModCreativeTabs.register()
         io.github.summpot.appliedflooring.registry.ModMenus.register()
         io.github.summpot.appliedflooring.network.LaserConnectorNetwork.init()
+        io.github.summpot.appliedflooring.network.ElevatorNetwork.init()
 
         EnvExecutor.runInEnv(Env.CLIENT) {
             Runnable {
@@ -78,9 +79,18 @@ object AppliedFlooringMod {
                     val below = player.blockPosition().below()
                     val state = lvl.getBlockState(below)
                     if (state.block is MEElevatorBlock) {
-                        if (player.isShiftKeyDown && onGround) {
-                            ElevatorTeleportHelper.tryTeleport(player, false)
-                        } else if (wasOnGround && !onGround && player.deltaMovement.y > 0.05 && player.fallDistance <= 0.1f) {
+                        // Shift is handled client-side as a floor picker; jump still goes up
+                        // unless the player is sprinting or moving near sprint speed.
+                        val jumpingUp = wasOnGround && !onGround &&
+                            player.deltaMovement.y > 0.05 &&
+                            player.fallDistance <= 0.1f &&
+                            !player.isShiftKeyDown
+                        if (jumpingUp && !ElevatorTracker.isFastHorizontal(
+                                player.deltaMovement.x,
+                                player.deltaMovement.z,
+                                player.isSprinting
+                            )
+                        ) {
                             ElevatorTeleportHelper.tryTeleport(player, true)
                         }
                     }

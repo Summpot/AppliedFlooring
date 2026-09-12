@@ -175,15 +175,22 @@ class MELaserConnectorBlockEntity(
 
     fun handleSetTargetOffset(dy: Int) {
         val maxDist = AppliedFlooringConfig.laserMaxDistance
-        targetYOffset = dy.coerceIn(2, maxDist)
+        targetYOffset = dy.coerceIn(0, maxDist)
         markForUpdate()
         markForSave()
     }
+
+    fun resolveBuildY(): Int = worldPosition.y + targetYOffset
 
     fun handlePlaceRemoteConnector(player: ServerPlayer): Boolean {
         val lvl = level ?: return false
         if (lvl.isClientSide) return false
 
+        if (targetYOffset < 2) {
+            builderStatus = BuilderStatus.BLOCKED
+            markForUpdate()
+            return false
+        }
         val targetPos = worldPosition.above(targetYOffset)
         if (targetPos.y >= lvl.maxBuildHeight || targetPos.y < lvl.minBuildHeight) {
             builderStatus = BuilderStatus.BLOCKED
@@ -363,7 +370,7 @@ class MELaserConnectorBlockEntity(
             }
         }
 
-        val targetY = if (connectedTargetUp != null) connectedTargetUp!!.y else pos.y + targetYOffset
+        val targetY = resolveBuildY()
 
         var blocksPlacedThisTick = 0
         val maxPerTick = AppliedFlooringConfig.laserBuilderBlocksPerTick
@@ -515,7 +522,7 @@ class MELaserConnectorBlockEntity(
 
         if (tag.contains("AFBuilder")) {
             val builderTag = tag.getCompound("AFBuilder")
-            targetYOffset = builderTag.getInt("TargetYOffset").coerceIn(2, 64)
+            targetYOffset = builderTag.getInt("TargetYOffset").coerceIn(0, 64)
             floorShape = FloorShape.byId(builderTag.getInt("Shape"))
             radiusX = builderTag.getInt("RadiusX").coerceIn(1, 32)
             radiusZ = builderTag.getInt("RadiusZ").coerceIn(1, 32)

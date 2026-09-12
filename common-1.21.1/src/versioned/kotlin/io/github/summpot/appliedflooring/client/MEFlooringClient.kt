@@ -1,8 +1,13 @@
 package io.github.summpot.appliedflooring.client
 
+import dev.architectury.event.EventResult
+import dev.architectury.event.events.client.ClientGuiEvent
 import dev.architectury.event.events.client.ClientLifecycleEvent
+import dev.architectury.event.events.client.ClientRawInputEvent
+import dev.architectury.event.events.client.ClientTickEvent
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry
 import dev.architectury.registry.menu.MenuRegistry
+import io.github.summpot.appliedflooring.client.gui.ElevatorFloorHud
 import io.github.summpot.appliedflooring.client.gui.MELaserConnectorScreen
 import io.github.summpot.appliedflooring.client.render.MEElevatorRenderer
 import io.github.summpot.appliedflooring.client.render.MEFlooringBlockEntityRenderer
@@ -16,6 +21,20 @@ object MEFlooringClient {
         ModMenus.ME_LASER_CONNECTOR_MENU.listen { menuType ->
             MenuRegistry.registerScreenFactory(menuType) { menu, inv, title ->
                 MELaserConnectorScreen(menu, inv, title)
+            }
+        }
+
+        ClientTickEvent.CLIENT_POST.register {
+            ElevatorFloorHud.tick()
+        }
+        ClientGuiEvent.RENDER_HUD.register { graphics, _ ->
+            ElevatorFloorHud.render(graphics)
+        }
+        ClientRawInputEvent.MOUSE_SCROLLED.register { _, _, amountY ->
+            if (ElevatorFloorHud.onScroll(amountY)) {
+                EventResult.interruptFalse()
+            } else {
+                EventResult.pass()
             }
         }
 

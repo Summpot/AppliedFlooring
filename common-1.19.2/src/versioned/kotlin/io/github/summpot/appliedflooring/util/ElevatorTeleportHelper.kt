@@ -19,10 +19,18 @@ import net.minecraft.world.phys.Vec3
 object ElevatorTeleportHelper {
 
     fun tryTeleport(player: ServerPlayer, up: Boolean): Boolean {
+        val origin = player.blockPosition().below()
+        val destination = findNextFloor(player.commandSenderWorld, origin, up) ?: return false
+        return tryTeleportTo(player, destination)
+    }
+
+    fun tryTeleportTo(player: ServerPlayer, destinationPos: BlockPos): Boolean {
         val level = player.commandSenderWorld as? ServerLevel ?: return false
         val origin = player.blockPosition().below()
         val originState = level.getBlockState(origin)
         val originBlock = originState.block as? MEElevatorBlock ?: return false
+        if (destinationPos == origin) return false
+        if (destinationPos.x != origin.x || destinationPos.z != origin.z) return false
 
         val originBe = level.getBlockEntity(origin) as? MEElevatorBlockEntity ?: return false
         if (!originBe.isPowered()) return false
@@ -34,61 +42,99 @@ object ElevatorTeleportHelper {
         val simulated = energyService.extractAEPower(energyCost, Actionable.SIMULATE, PowerMultiplier.ONE)
         if (simulated < energyCost) return false
 
+        val maxDist = AppliedFlooringConfig.elevatorMaxDistance
+        val dist = kotlin.math.abs(destinationPos.y - origin.y)
+        if (dist < 2 || dist > maxDist) return false
+        if (!isListedFloor(level, origin, originBlock, originBe, destinationPos)) return false
+        if (!isClearSpace(level, destinationPos)) return false
+
+        energyService.extractAEPower(energyCost, Actionable.MODULATE, PowerMultiplier.ONE)
+        performTeleport(player, level, origin, destinationPos)
+        return true
+    }
+
+    fun collectFloors(level: Level, origin: BlockPos, requirePoweredGrid: Boolean): List<BlockPos> {
+        val originState = level.getBlockState(origin)
+        val originBlock = originState.block as? MEElevatorBlock ?: return listOf(origin)
+        val originBe = level.getBlockEntity(origin) as? MEElevatorBlockEntity
+        val maxDist = AppliedFlooringConfig.elevatorMaxDistance
+        val floors = mutableListOf<BlockPos>()
+
+        for (dist in maxDist downTo 2) {
+            val candidate = origin.below(dist)
+            if (isListedFloor(level, origin, originBlock, originBe, candidate, requirePoweredGrid) &&
+                isClearSpace(level, candidate)
+            ) {
+                floors.add(candidate)
+            }
+        }
+        floors.add(origin)
+        for (dist in 2..maxDist) {
+            val candidate = origin.above(dist)
+            if (isListedFloor(level, origin, originBlock, originBe, candidate, requirePoweredGrid) &&
+                isClearSpace(level, candidate)
+            ) {
+                floors.add(candidate)
+            }
+        }
+        return floors
+    }
+
+    private fun findNextFloor(level: Level, origin: BlockPos, up: Boolean): BlockPos? {
+        val originState = level.getBlockState(origin)
+        val originBlock = originState.block as? MEElevatorBlock ?: return null
+        val originBe = level.getBlockEntity(origin) as? MEElevatorBlockEntity ?: return null
         val dir = if (up) 1 else -1
         val maxDist = AppliedFlooringConfig.elevatorMaxDistance
-
-        var destinationPos: BlockPos? = null
-
-        // Pass 1: Search for matching MEElevatorBlock in target direction
         for (dist in 2..maxDist) {
             val candidate = origin.above(dir * dist)
-            val candState = level.getBlockState(candidate)
-            if (candState.block is MEElevatorBlock) {
-                val candBlock = candState.block as MEElevatorBlock
-                if (candBlock.color == originBlock.color || originBlock.color == AEColor.TRANSPARENT || candBlock.color == AEColor.TRANSPARENT) {
-                    val candBe = level.getBlockEntity(candidate) as? MEElevatorBlockEntity
-                    if (candBe != null && candBe.isPowered() && candBe.mainNode.grid == grid) {
-                        if (isClearSpace(level, candidate)) {
-                            destinationPos = candidate
-                            break
-                        }
-                    }
-                }
+            if (isListedFloor(level, origin, originBlock, originBe, candidate, true) && isClearSpace(level, candidate)) {
+                return candidate
             }
         }
+        return null
+    }
 
-        // Pass 2: Fallback to regular MEFlooringBlock if enabled and no elevator found in target direction
-        if (destinationPos == null && AppliedFlooringConfig.elevatorAllowFallbackFlooring) {
-            for (dist in 2..maxDist) {
-                val candidate = origin.above(dir * dist)
-                val candState = level.getBlockState(candidate)
-                if (candState.block is MEFlooringBlock && candState.block !is MEElevatorBlock) {
-                    if (isClearSpace(level, candidate)) {
-                        destinationPos = candidate
-                        break
-                    }
-                }
-            }
+    private fun isListedFloor(
+        level: Level,
+        origin: BlockPos,
+        originBlock: MEElevatorBlock,
+        originBe: MEElevatorBlockEntity?,
+        candidate: BlockPos,
+        requirePoweredGrid: Boolean = true
+    ): Boolean {
+        val candState = level.getBlockState(candidate)
+        if (candState.block is MEElevatorBlock) {
+            val candBlock = candState.block as MEElevatorBlock
+            val colorOk = candBlock.color == originBlock.color ||
+                originBlock.color == AEColor.TRANSPARENT ||
+                candBlock.color == AEColor.TRANSPARENT
+            if (!colorOk) return false
+            if (!requirePoweredGrid) return true
+            val candBe = level.getBlockEntity(candidate) as? MEElevatorBlockEntity ?: return false
+            val originGrid = originBe?.mainNode?.grid
+            return candBe.isPowered() && originGrid != null && candBe.mainNode.grid == originGrid
         }
+        if (AppliedFlooringConfig.elevatorAllowFallbackFlooring &&
+            candState.block is MEFlooringBlock &&
+            candState.block !is MEElevatorBlock
+        ) {
+            return true
+        }
+        return false
+    }
 
-        if (destinationPos == null) return false
-
-        // Extract power from origin elevator's ME grid
-        energyService.extractAEPower(energyCost, Actionable.MODULATE, PowerMultiplier.ONE)
-
-        // AE2 Spatial IO styled effects at origin
+    private fun performTeleport(player: ServerPlayer, level: ServerLevel, origin: BlockPos, destinationPos: BlockPos) {
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, origin.x + 0.5, origin.y + 1.2, origin.z + 0.5, 25, 0.25, 0.5, 0.25, 0.05)
         level.sendParticles(ParticleTypes.END_ROD, origin.x + 0.5, origin.y + 1.1, origin.z + 0.5, 15, 0.2, 0.5, 0.2, 0.08)
         level.sendParticles(ParticleTypes.GLOW, origin.x + 0.5, origin.y + 1.2, origin.z + 0.5, 10, 0.3, 0.4, 0.3, 0.05)
         level.playSound(null, origin, SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.PLAYERS, 0.7f, 1.6f)
         level.playSound(null, origin, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.8f)
 
-        // Teleport player
         player.teleportTo(level, destinationPos.x + 0.5, destinationPos.y + 1.0, destinationPos.z + 0.5, player.yRot, player.xRot)
         player.deltaMovement = Vec3.ZERO
         player.fallDistance = 0.0f
 
-        // AE2 Spatial IO styled effects at destination
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, destinationPos.x + 0.5, destinationPos.y + 1.2, destinationPos.z + 0.5, 20, 0.25, 0.5, 0.25, 0.05)
         level.sendParticles(ParticleTypes.END_ROD, destinationPos.x + 0.5, destinationPos.y + 1.1, destinationPos.z + 0.5, 12, 0.2, 0.5, 0.2, 0.05)
         level.sendParticles(ParticleTypes.INSTANT_EFFECT, destinationPos.x + 0.5, destinationPos.y + 1.2, destinationPos.z + 0.5, 8, 0.3, 0.4, 0.3, 0.05)
@@ -96,7 +142,6 @@ object ElevatorTeleportHelper {
         level.playSound(null, destinationPos, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 1.8f)
 
         ElevatorTracker.setCooldown(player.uuid, AppliedFlooringConfig.elevatorCooldownTicks)
-        return true
     }
 
     private fun isClearSpace(level: Level, pos: BlockPos): Boolean {
